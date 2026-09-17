@@ -1,0 +1,20 @@
+{
+  "CFBundleDevelopmentRegion" : "en",
+  "CFBundleExecutable" : "EmoPic",
+  "CFBundleIconFile" : "AppIcon",
+  "CFBundleIconName" : "AppIcon",
+  "CFBundleIdentifier" : "net.emopic.app",
+  "CFBundleInfoDictionaryVersion" : "6.0",
+  "CFBundleName" : "EmoPic",
+  "CFBundlePackageType" : "APPL",
+  "CFBundleShortVersionString" : "1.0",
+  "CFBundleVersion" : "1",
+  "LSMinimumSystemVersion" : "14.0",
+  "NSHumanReadableCopyright" : "MIT License",
+  "NSPrincipalClass" : "NSApplication",
+  "NSAppTransportSecurity" : {
+    "NSAllowsArbitraryLoads" : true
+  },
+  "NSAccessibilityUsageDescription" : "EmoPic needs accessibility access to insert emoji into text fields in other apps.",
+  "LSUIElement" : true
+}

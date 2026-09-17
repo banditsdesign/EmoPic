@@ -1,0 +1,318 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+	
+/* Begin PBXBuildFile section */
+		A10001 = {isa = PBXBuildFile; fileRef = A10010; };
+		A10002 = {isa = PBXBuildFile; fileRef = A10011; };
+		A10003 = {isa = PBXBuildFile; fileRef = A10012; };
+		A10004 = {isa = PBXBuildFile; fileRef = A10013; };
+		A10005 = {isa = PBXBuildFile; fileRef = A10014; };
+		A10006 = {isa = PBXBuildFile; fileRef = A10015; };
+		A10007 = {isa = PBXBuildFile; fileRef = A10016; };
+		A10008 = {isa = PBXBuildFile; fileRef = A10017; };
+		A10009 = {isa = PBXBuildFile; fileRef = A10018; };
+		A1000A = {isa = PBXBuildFile; fileRef = A10019; };
+		A1000B = {isa = PBXBuildFile; fileRef = A1001A; };
+		A1000C = {isa = PBXBuildFile; fileRef = A1001B; };
+		A1000D = {isa = PBXBuildFile; fileRef = A1001C; };
+		A1000E = {isa = PBXBuildFile; fileRef = A1001D; };
+		A1000F = {isa = PBXBuildFile; fileRef = A1001E; };
+	/* End PBXBuildFile section */
+
+	/* Begin PBXFileReference section */
+		A10010 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		A10011 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoPic-App.swift; sourceTree = "<group>"; };
+		A10012 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCategory.swift; sourceTree = "<group>"; };
+		A10013 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiDataManager.swift; sourceTree = "<group>"; };
+		A10014 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiItem.swift; sourceTree = "<group>"; };
+		A10015 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkinTone.swift; sourceTree = "<group>"; };
+		A10016 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrequentEmojiStore.swift; sourceTree = "<group>"; };
+		A10017 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuBarIconView.swift; sourceTree = "<group>"; };
+		A10018 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuBarRootView.swift; sourceTree = "<group>"; };
+		A10019 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
+		A1001A = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiPickerWindow.swift; sourceTree = "<group>"; };
+		A1001B = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccessibilityInjector.swift; sourceTree = "<group>"; };
+		A1001C = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiShortcutMonitor.swift; sourceTree = "<group>"; };
+		A1001D = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionInfo.swift; sourceTree = "<group>"; };
+		A1001E = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		A000FF = {{isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EmoPic.app; sourceTree = BUILT_PRODUCTS_DIR; }};
+	/* End PBXFileReference section */
+
+	/* Begin PBXFrameworksBuildPhase section */
+		A000F1 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A000F2, // ApplicationServices
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+	/* End PBXFrameworksBuildPhase section */
+
+	/* Begin PBXResourcesBuildPhase section */
+		A000R1 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+	/* End PBXResourcesBuildPhase section */
+
+	/* Begin PBXSourcesBuildPhase section */
+		A000S1 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10001,
+				A10002,
+				A10003,
+				A10004,
+				A10005,
+				A10006,
+				A10007,
+				A10008,
+				A10009,
+				A1000A,
+				A1000B,
+				A1000C,
+				A1000D,
+				A1000E,
+				A1000F,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+	/* End PBXSourcesBuildPhase section */
+
+	/* Begin PBXGroup section */
+		A000G0 = {
+			isa = PBXGroup;
+			children = (
+				A000G1, // App
+				A000G2, // Emoji
+				A000G3, // MenuBar
+				A000G4, // Picker
+				A000G5, // Insertion
+				A000G6, // Shortcuts
+				A000G7, // Utilities
+				A000G8, // EmoPic
+			);
+			sourceTree = "<group>";
+		};
+		A000G1 = {
+			isa = PBXGroup;
+			children = (
+				A10010,
+				A10011,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A000G2 = {
+			isa = PBXGroup;
+			children = (
+				A10014,
+				A10012,
+				A10013,
+				A10015,
+			);
+			path = Emoji;
+			sourceTree = "<group>";
+		};
+		A000G3 = {
+			isa = PBXGroup;
+			children = (
+				A10017,
+				A10018,
+				A10016,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		A000G4 = {
+			isa = PBXGroup;
+			children = (
+				A10019,
+				A1001A,
+			);
+			path = Picker;
+			sourceTree = "<group>";
+		};
+		A000G5 = {
+			isa = PBXGroup;
+			children = (
+				A1001B,
+			);
+			path = Insertion;
+			sourceTree = "<group>";
+		};
+		A000G6 = {
+			isa = PBXGroup;
+			children = (
+				A1001C,
+			);
+			path = Shortcuts;
+			sourceTree = "<group>";
+		};
+		A000G7 = {
+			isa = PBXGroup;
+			children = (
+				A1001D,
+				A1001E,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+	/* End PBXGroup section */
+
+	/* Begin PBXNativeTarget section */
+		A000T0 = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A000C1;
+			buildPhases = (
+				A000S1,
+				A000R1,
+				A000F1,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EmoPic;
+			productName = EmoPic;
+			productReference = A000FF;
+			productType = "com.apple.product-type.application";
+		};
+	/* End PBXNativeTarget section */
+
+	/* Begin PBXProject section */
+		A000P0 = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					A000T0 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = A000C0;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A000G8;
+			productRefGroup = A000G9;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A000T0,
+			);
+		};
+	/* End PBXProject section */
+
+	/* Begin XCBuildConfiguration section */
+		A000B0 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		A000B1 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		A000B2 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EmoPic/Info.plist;
+				INFOPLIST_KEY_NSAccessibilityUsageDescription = "EmoPic needs accessibility access to insert emoji into text fields in other apps.";
+				INFOPLIST_KEY_NSAppTransportSecurity = "{ NSAllowsArbitraryLoads = true; }";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.emopic.app";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		A000B3 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EmoPic/Info.plist;
+				INFOPLIST_KEY_NSAccessibilityUsageDescription = "EmoPic needs accessibility access to insert emoji into text fields in other apps.";
+				INFOPLIST_KEY_NSAppTransportSecurity = "{ NSAllowsArbitraryLoads = true; }";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.emopic.app";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+	/* End XCBuildConfiguration section */
+
+	/* Begin XCConfigurationList section */
+		A000C0 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A000B0,
+				A000B1,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A000C1 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A000B2,
+				A000B3,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+	/* End XCConfigurationList section */
+
+	};
+	rootObject = A000P0;
+}
