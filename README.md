@@ -5,7 +5,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 ## Features
 
 - **Menu Bar Picker**: Click the emoji icon to open a searchable emoji picker
-- **Slack-style Shortcuts**: Type `:smile`, `:thumbsup:`, etc. anywhere on your Mac
+- **Slack-style Shortcuts**: Type `:smile:` or `:thumbsup:` to insert emoji (currently limited to EmoPic's own windows — cross-app support via a global event tap is planned)
 - **Skin Tone Support**: Pick your preferred skin tone for hand, person, and other emoji
 - **Light & Dark Mode**: Automatically follows your system appearance
 - **Frequently Used**: Your most-used emoji rise to the top
@@ -17,13 +17,16 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 Click the 🎨 emoji icon in your menu bar to open the picker window. Search or browse categories to find the emoji you want.
 
 ### Slack-style Shortcuts
-Type a colon `:` in any text field to trigger the emoji picker. Type more characters to filter. Press `Enter`/`Tab` to insert, or `Escape` to dismiss.
+Type `:smile:` in a text field and it becomes 😄. **Current scope:** the shortcut monitor uses an app-local event monitor, so replacement happens only in EmoPic's own text fields. Cross-app replacement (global `CGEventTap` + Accessibility text APIs) is the next milestone — see [docs/NEXT_STEPS_PLAN.md](docs/NEXT_STEPS_PLAN.md).
 
 ### Keyboard Shortcuts
-- `⌘ Space` - Toggle the emoji picker window
+Planned (see [docs/NEXT_STEPS_PLAN.md](docs/NEXT_STEPS_PLAN.md)):
+- `⌥⌘E` - Toggle the emoji picker window (global hotkey)
 - `↑/↓` - Navigate picker results
 - `Enter/Tab` - Insert selected emoji
-- `Escape` - Close picker / dismiss shortcut mode
+- `Escape` - Close picker
+
+Today: open the picker from the menu bar icon and click to insert.
 
 ## Architecture
 
