@@ -20,13 +20,12 @@ Click the 🎨 emoji icon in your menu bar to open the picker window. Search or 
 Type `:smile:` in a text field and it becomes 😄. **Current scope:** the shortcut monitor uses an app-local event monitor, so replacement happens only in EmoPic's own text fields. Cross-app replacement (global `CGEventTap` + Accessibility text APIs) is the next milestone — see [docs/NEXT_STEPS_PLAN.md](docs/NEXT_STEPS_PLAN.md).
 
 ### Keyboard Shortcuts
+- `⌥⌘E` - Toggle the emoji picker window (global hotkey, works in any app — presets configurable in Settings)
+
 Planned (see [docs/NEXT_STEPS_PLAN.md](docs/NEXT_STEPS_PLAN.md)):
-- `⌥⌘E` - Toggle the emoji picker window (global hotkey)
 - `↑/↓` - Navigate picker results
 - `Enter/Tab` - Insert selected emoji
 - `Escape` - Close picker
-
-Today: open the picker from the menu bar icon and click to insert.
 
 ## Architecture
 
