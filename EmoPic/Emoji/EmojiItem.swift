@@ -81,7 +81,8 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
         let keywords = ["hand", "person", "man", "woman", "girl", "boy",
                        "family", "people", "bowing", "shrugging",
                        "gesturing", "raising", "palming"]
-        return name.lowercased().contains { kw in keywords.contains { kw.contains($0) } }
+        let name = self.name.lowercased()
+        return keywords.contains { name.contains($0) }
     }
 
     /// Create a skin tone variant.

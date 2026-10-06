@@ -33,8 +33,9 @@ final class EmojiDataManager: ObservableObject {
     }
 
     func suggested(for text: String) -> EmojiItem? {
-        let t = text.hasPrefix(":") ? String(text.dropFirst()) : text
-        let t = t.hasSuffix(":") ? String(t.dropLast()) : t
+        var t = text
+        if t.hasPrefix(":") { t = String(t.dropFirst()) }
+        if t.hasSuffix(":") { t = String(t.dropLast()) }
         let q = t.lowercased()
         return aliasMap[q] ?? search(q, first: 1).first
     }
@@ -85,14 +86,42 @@ final class EmojiDataManager: ObservableObject {
     private func parseEmojiJSON(_ data: Data) -> [EmojiItem]? {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return nil }
         return json.compactMap { j -> EmojiItem? in
-            let emoji = j["emoji"] as? String ?? j["unified"] as? String ?? ""
+            // Build the emoji character from the `unified` hex codepoint sequence
+            let emoji = emojiFromUnified(j["unified"] as? String ?? "")
             guard !emoji.isEmpty else { return nil }
             let name = j["name"] as? String ?? ""
-            let tags = (j["tags"] as? [String] ?? []) + (j["shortcode"] as? [String] ?? [])
-            let group = j["category"] as? String ?? j["group"] as? String ?? ""
-            return EmojiItem(emoji: emoji, name: name, aliases: tags, version: "1.0",
-                           category: EmojiCategory.from(group: group))
+            // Aliases: read from short_names array, fallback to short_name string
+            let aliases: [String] = {
+                if let arr = j["short_names"] as? [String] { return arr }
+                if let single = j["short_name"] as? String { return [single] }
+                return []
+            }()
+            let group = j["category"] as? String ?? ""
+            let addedIn = j["added_in"] as? String ?? "1.0"
+            return EmojiItem(
+                emoji: emoji,
+                name: name,
+                aliases: aliases,
+                version: addedIn,
+                category: EmojiCategory.from(group: group)
+            )
         }
+    }
+
+    /// Convert a unified hex codepoint sequence (e.g. "1F600" or "1F469-200D-1F469-200D-1F467-200D-1F467")
+    /// into a Unicode emoji string.
+    private func emojiFromUnified(_ unified: String) -> String {
+        let parts = unified.split(separator: "-").map { String($0).trimmingCharacters(in: .whitespaces) }
+        guard !parts.isEmpty else { return "" }
+        let codepoints = parts.compactMap { UInt32($0, radix: 16) }
+        guard !codepoints.isEmpty else { return "" }
+        let scalars = codepoints.compactMap { UnicodeScalar($0) }
+        guard !scalars.isEmpty else { return "" }
+        var result = ""
+        for scalar in scalars {
+            result.append(String(scalar))
+        }
+        return result.trimmingCharacters(in: .controlCharacters)
     }
 
     private func rebuildIndexes() {
@@ -105,7 +134,7 @@ final class EmojiDataManager: ObservableObject {
             }
             aliasMap[e.name.lowercased()] = e
         }
-        for key in byCategory.keys {
+        for key in Array(byCategory.keys) {
             byCategory[key]?.sort { $0.name.lowercased() < $1.name.lowercased() }
         }
     }

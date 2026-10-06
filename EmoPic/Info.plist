@@ -1,20 +1,36 @@
-{
-  "CFBundleDevelopmentRegion" : "en",
-  "CFBundleExecutable" : "EmoPic",
-  "CFBundleIconFile" : "AppIcon",
-  "CFBundleIconName" : "AppIcon",
-  "CFBundleIdentifier" : "net.emopic.app",
-  "CFBundleInfoDictionaryVersion" : "6.0",
-  "CFBundleName" : "EmoPic",
-  "CFBundlePackageType" : "APPL",
-  "CFBundleShortVersionString" : "1.0",
-  "CFBundleVersion" : "1",
-  "LSMinimumSystemVersion" : "14.0",
-  "NSHumanReadableCopyright" : "MIT License",
-  "NSPrincipalClass" : "NSApplication",
-  "NSAppTransportSecurity" : {
-    "NSAllowsArbitraryLoads" : true
-  },
-  "NSAccessibilityUsageDescription" : "EmoPic needs accessibility access to insert emoji into text fields in other apps.",
-  "LSUIElement" : true
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>EmoPic</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>net.emopic.app</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>EmoPic</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAccessibilityUsageDescription</key>
+	<string>EmoPic needs accessibility access to insert emoji into text fields in other apps.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>MIT License</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>

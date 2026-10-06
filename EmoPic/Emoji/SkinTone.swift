@@ -12,6 +12,7 @@ enum SkinTone: String, CaseIterable, Identifiable, CustomStringConvertible {
     case dark = "🏿"
 
     var id: String { rawValue }
+    var emoji: String { rawValue }
     var description: String {
         switch self {
         case .default: return "Default"

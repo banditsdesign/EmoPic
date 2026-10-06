@@ -3,16 +3,16 @@
 
 import Foundation
 
-enum EmojiCategory: String, CaseIterable, Identifiable {
+enum EmojiCategory: String, CaseIterable, Codable, Identifiable {
     case smileys = "smileys"
-    people = "people"
-    animals = "animals"
-    food = "food"
-    activities = "activities"
-    travel = "travel"
-    objects = "objects"
-    symbols = "symbols"
-    flags = "flags"
+    case people = "people"
+    case animals = "animals"
+    case food = "food"
+    case activities = "activities"
+    case travel = "travel"
+    case objects = "objects"
+    case symbols = "symbols"
+    case flags = "flags"
 
     var id: String { rawValue }
 
@@ -42,5 +42,19 @@ enum EmojiCategory: String, CaseIterable, Identifiable {
         case .symbols: return "❤️"
         case .flags: return "🏁"
         }
+    }
+
+    /// Map an `iamcal/emoji-data` group/category string onto a category.
+    static func from(group: String) -> EmojiCategory {
+        let g = group.lowercased()
+        if g.contains("smile") || g.contains("emotion") { return .smileys }
+        if g.contains("people") || g.contains("body") || g.contains("person") { return .people }
+        if g.contains("animal") || g.contains("nature") { return .animals }
+        if g.contains("food") || g.contains("drink") { return .food }
+        if g.contains("activity") || g.contains("activities") { return .activities }
+        if g.contains("travel") || g.contains("place") { return .travel }
+        if g.contains("object") { return .objects }
+        if g.contains("flag") { return .flags }
+        return .symbols
     }
 }

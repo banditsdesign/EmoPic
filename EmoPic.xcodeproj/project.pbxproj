@@ -5,179 +5,200 @@
 	};
 	objectVersion = 56;
 	objects = {
-	
+
 /* Begin PBXBuildFile section */
-		A10001 = {isa = PBXBuildFile; fileRef = A10010; };
-		A10002 = {isa = PBXBuildFile; fileRef = A10011; };
-		A10003 = {isa = PBXBuildFile; fileRef = A10012; };
-		A10004 = {isa = PBXBuildFile; fileRef = A10013; };
-		A10005 = {isa = PBXBuildFile; fileRef = A10014; };
-		A10006 = {isa = PBXBuildFile; fileRef = A10015; };
-		A10007 = {isa = PBXBuildFile; fileRef = A10016; };
-		A10008 = {isa = PBXBuildFile; fileRef = A10017; };
-		A10009 = {isa = PBXBuildFile; fileRef = A10018; };
-		A1000A = {isa = PBXBuildFile; fileRef = A10019; };
-		A1000B = {isa = PBXBuildFile; fileRef = A1001A; };
-		A1000C = {isa = PBXBuildFile; fileRef = A1001B; };
-		A1000D = {isa = PBXBuildFile; fileRef = A1001C; };
-		A1000E = {isa = PBXBuildFile; fileRef = A1001D; };
-		A1000F = {isa = PBXBuildFile; fileRef = A1001E; };
-	/* End PBXBuildFile section */
+		A10001 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10010 /* App.swift */; };
+		A10002 /* EmoPic-App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10011 /* EmoPic-App.swift */; };
+		A10003 /* EmojiCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10012 /* EmojiCategory.swift */; };
+		A10004 /* EmojiDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10013 /* EmojiDataManager.swift */; };
+		A10005 /* EmojiItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10014 /* EmojiItem.swift */; };
+		A10006 /* SkinTone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10015 /* SkinTone.swift */; };
+		A10007 /* FrequentEmojiStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10016 /* FrequentEmojiStore.swift */; };
+		A10008 /* MenuBarIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10017 /* MenuBarIconView.swift */; };
+		A10009 /* MenuBarRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10018 /* MenuBarRootView.swift */; };
+		A1000A /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10019 /* EmojiPickerView.swift */; };
+		A1000B /* EmojiPickerWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001A /* EmojiPickerWindow.swift */; };
+		A1000C /* AccessibilityInjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001B /* AccessibilityInjector.swift */; };
+		A1000D /* EmojiShortcutMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001C /* EmojiShortcutMonitor.swift */; };
+		A1000E /* VersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001D /* VersionInfo.swift */; };
+		A1000F /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001E /* AppSettings.swift */; };
+		A10024 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000102 /* SettingsWindow.swift */; };
+		A10025 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000103 /* SettingsView.swift */; };
+		A10020 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10021 /* ApplicationServices.framework */; };
+		A10022 /* emoji-data.json in Resources */ = {isa = PBXBuildFile; fileRef = A10023 /* emoji-data.json */; };
+/* End PBXBuildFile section */
 
-	/* Begin PBXFileReference section */
-		A10010 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		A10011 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoPic-App.swift; sourceTree = "<group>"; };
-		A10012 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCategory.swift; sourceTree = "<group>"; };
-		A10013 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiDataManager.swift; sourceTree = "<group>"; };
-		A10014 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiItem.swift; sourceTree = "<group>"; };
-		A10015 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkinTone.swift; sourceTree = "<group>"; };
-		A10016 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrequentEmojiStore.swift; sourceTree = "<group>"; };
-		A10017 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuBarIconView.swift; sourceTree = "<group>"; };
-		A10018 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuBarRootView.swift; sourceTree = "<group>"; };
-		A10019 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
-		A1001A = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiPickerWindow.swift; sourceTree = "<group>"; };
-		A1001B = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccessibilityInjector.swift; sourceTree = "<group>"; };
-		A1001C = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiShortcutMonitor.swift; sourceTree = "<group>"; };
-		A1001D = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionInfo.swift; sourceTree = "<group>"; };
-		A1001E = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
-		A000FF = {{isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EmoPic.app; sourceTree = BUILT_PRODUCTS_DIR; }};
-	/* End PBXFileReference section */
+/* Begin PBXFileReference section */
+		A000FF /* EmoPic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmoPic.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10010 /* App.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		A10011 /* EmoPic-App.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoPic-App.swift; sourceTree = "<group>"; };
+		A10012 /* EmojiCategory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCategory.swift; sourceTree = "<group>"; };
+		A10013 /* EmojiDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiDataManager.swift; sourceTree = "<group>"; };
+		A10014 /* EmojiItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiItem.swift; sourceTree = "<group>"; };
+		A10015 /* SkinTone.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkinTone.swift; sourceTree = "<group>"; };
+		A10016 /* FrequentEmojiStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrequentEmojiStore.swift; sourceTree = "<group>"; };
+		A10017 /* MenuBarIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuBarIconView.swift; sourceTree = "<group>"; };
+		A10018 /* MenuBarRootView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuBarRootView.swift; sourceTree = "<group>"; };
+		A10019 /* EmojiPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
+		A1001A /* EmojiPickerWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiPickerWindow.swift; sourceTree = "<group>"; };
+		A1001B /* AccessibilityInjector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccessibilityInjector.swift; sourceTree = "<group>"; };
+		A1001C /* EmojiShortcutMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiShortcutMonitor.swift; sourceTree = "<group>"; };
+		A1001D /* VersionInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionInfo.swift; sourceTree = "<group>"; };
+		A1001E /* AppSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		A000100 /* SettingsWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
+		A000101 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A000102 /* SettingsWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
+		A000103 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A1001F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10021 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
+		A10023 /* emoji-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = emoji-data.json; sourceTree = "<group>"; };
+/* End PBXFileReference section */
 
-	/* Begin PBXFrameworksBuildPhase section */
-		A000F1 = {
+/* Begin PBXFrameworksBuildPhase section */
+		A000F1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A000F2, // ApplicationServices
+				A10020 /* ApplicationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-	/* End PBXFrameworksBuildPhase section */
+/* End PBXFrameworksBuildPhase section */
 
-	/* Begin PBXResourcesBuildPhase section */
-		A000R1 = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-	/* End PBXResourcesBuildPhase section */
-
-	/* Begin PBXSourcesBuildPhase section */
-		A000S1 = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A10001,
-				A10002,
-				A10003,
-				A10004,
-				A10005,
-				A10006,
-				A10007,
-				A10008,
-				A10009,
-				A1000A,
-				A1000B,
-				A1000C,
-				A1000D,
-				A1000E,
-				A1000F,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-	/* End PBXSourcesBuildPhase section */
-
-	/* Begin PBXGroup section */
-		A000G0 = {
+/* Begin PBXGroup section */
+		A000G0 /* EmoPic */ = {
 			isa = PBXGroup;
 			children = (
-				A000G1, // App
-				A000G2, // Emoji
-				A000G3, // MenuBar
-				A000G4, // Picker
-				A000G5, // Insertion
-				A000G6, // Shortcuts
-				A000G7, // Utilities
-				A000G8, // EmoPic
+				A000G1 /* App */,
+				A000G2 /* Emoji */,
+				A000G3 /* MenuBar */,
+				A000G4 /* Picker */,
+				A000G5 /* Insertion */,
+				A000G6 /* Shortcuts */,
+				A000GA /* Settings */,
+				A000G7 /* Utilities */,
+				A000RG /* Resources */,
+				A1001F /* Info.plist */,
 			);
+			path = EmoPic;
 			sourceTree = "<group>";
 		};
-		A000G1 = {
+		A000G1 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				A10010,
-				A10011,
+				A10010 /* App.swift */,
+				A10011 /* EmoPic-App.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
 		};
-		A000G2 = {
+		A000G2 /* Emoji */ = {
 			isa = PBXGroup;
 			children = (
-				A10014,
-				A10012,
-				A10013,
-				A10015,
+				A10014 /* EmojiItem.swift */,
+				A10012 /* EmojiCategory.swift */,
+				A10013 /* EmojiDataManager.swift */,
+				A10015 /* SkinTone.swift */,
 			);
 			path = Emoji;
 			sourceTree = "<group>";
 		};
-		A000G3 = {
+		A000G3 /* MenuBar */ = {
 			isa = PBXGroup;
 			children = (
-				A10017,
-				A10018,
-				A10016,
+				A10017 /* MenuBarIconView.swift */,
+				A10018 /* MenuBarRootView.swift */,
+				A10016 /* FrequentEmojiStore.swift */,
 			);
 			path = MenuBar;
 			sourceTree = "<group>";
 		};
-		A000G4 = {
+		A000G4 /* Picker */ = {
 			isa = PBXGroup;
 			children = (
-				A10019,
-				A1001A,
+				A10019 /* EmojiPickerView.swift */,
+				A1001A /* EmojiPickerWindow.swift */,
 			);
 			path = Picker;
 			sourceTree = "<group>";
 		};
-		A000G5 = {
+		A000G5 /* Insertion */ = {
 			isa = PBXGroup;
 			children = (
-				A1001B,
+				A1001B /* AccessibilityInjector.swift */,
 			);
 			path = Insertion;
 			sourceTree = "<group>";
 		};
-		A000G6 = {
+		A000G6 /* Shortcuts */ = {
 			isa = PBXGroup;
 			children = (
-				A1001C,
+				A1001C /* EmojiShortcutMonitor.swift */,
 			);
 			path = Shortcuts;
 			sourceTree = "<group>";
 		};
-		A000G7 = {
+		A000G7 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				A1001D,
-				A1001E,
+				A1001D /* VersionInfo.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
 		};
-	/* End PBXGroup section */
+		A000G8 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				A000G0 /* EmoPic */,
+				A000G9 /* Products */,
+				A000GF /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		A000G9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A000FF /* EmoPic.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A000GA /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A1001E /* AppSettings.swift */,
+				A000102 /* SettingsWindow.swift */,
+				A000103 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		A000GF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A10021 /* ApplicationServices.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A000RG /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A10023 /* emoji-data.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
 
-	/* Begin PBXNativeTarget section */
-		A000T0 = {
+/* Begin PBXNativeTarget section */
+		A000T0 /* EmoPic */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A000C1;
+			buildConfigurationList = A000C1 /* Build configuration list for PBXNativeTarget "EmoPic" */;
 			buildPhases = (
-				A000S1,
-				A000R1,
-				A000F1,
+				A000S1 /* Sources */,
+				A000F1 /* Frameworks */,
+				A000R1 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -185,13 +206,13 @@
 			);
 			name = EmoPic;
 			productName = EmoPic;
-			productReference = A000FF;
+			productReference = A000FF /* EmoPic.app */;
 			productType = "com.apple.product-type.application";
 		};
-	/* End PBXNativeTarget section */
+/* End PBXNativeTarget section */
 
-	/* Begin PBXProject section */
-		A000P0 = {
+/* Begin PBXProject section */
+		A000P0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
@@ -203,7 +224,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A000C0;
+			buildConfigurationList = A000C0 /* Build configuration list for PBXProject "EmoPic" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -212,17 +233,55 @@
 				Base,
 			);
 			mainGroup = A000G8;
-			productRefGroup = A000G9;
+			productRefGroup = A000G9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A000T0,
+				A000T0 /* EmoPic */,
 			);
 		};
-	/* End PBXProject section */
+/* End PBXProject section */
 
-	/* Begin XCBuildConfiguration section */
-		A000B0 = {
+/* Begin PBXResourcesBuildPhase section */
+		A000R1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10022 /* emoji-data.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A000S1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10001 /* App.swift in Sources */,
+				A10002 /* EmoPic-App.swift in Sources */,
+				A10003 /* EmojiCategory.swift in Sources */,
+				A10004 /* EmojiDataManager.swift in Sources */,
+				A10005 /* EmojiItem.swift in Sources */,
+				A10006 /* SkinTone.swift in Sources */,
+				A10007 /* FrequentEmojiStore.swift in Sources */,
+				A10008 /* MenuBarIconView.swift in Sources */,
+				A10009 /* MenuBarRootView.swift in Sources */,
+				A1000A /* EmojiPickerView.swift in Sources */,
+				A1000B /* EmojiPickerWindow.swift in Sources */,
+				A1000C /* AccessibilityInjector.swift in Sources */,
+				A1000D /* EmojiShortcutMonitor.swift in Sources */,
+				A1000E /* VersionInfo.swift in Sources */,
+				A1000F /* AppSettings.swift in Sources */,
+				A10024 /* SettingsWindow.swift in Sources */,
+				A10025 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A000B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -234,7 +293,7 @@
 			};
 			name = Debug;
 		};
-		A000B1 = {
+		A000B1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -246,20 +305,24 @@
 			};
 			name = Release;
 		};
-		A000B2 = {
+		A000B2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EmoPic/Info.plist;
 				INFOPLIST_KEY_NSAccessibilityUsageDescription = "EmoPic needs accessibility access to insert emoji into text fields in other apps.";
-				INFOPLIST_KEY_NSAppTransportSecurity = "{ NSAllowsArbitraryLoads = true; }";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "net.emopic.app";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -268,20 +331,24 @@
 			};
 			name = Debug;
 		};
-		A000B3 = {
+		A000B3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EmoPic/Info.plist;
 				INFOPLIST_KEY_NSAccessibilityUsageDescription = "EmoPic needs accessibility access to insert emoji into text fields in other apps.";
-				INFOPLIST_KEY_NSAppTransportSecurity = "{ NSAllowsArbitraryLoads = true; }";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "net.emopic.app";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -290,29 +357,28 @@
 			};
 			name = Release;
 		};
-	/* End XCBuildConfiguration section */
+/* End XCBuildConfiguration section */
 
-	/* Begin XCConfigurationList section */
-		A000C0 = {
+/* Begin XCConfigurationList section */
+		A000C0 /* Build configuration list for PBXProject "EmoPic" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A000B0,
-				A000B1,
+				A000B0 /* Debug */,
+				A000B1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A000C1 = {
+		A000C1 /* Build configuration list for PBXNativeTarget "EmoPic" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A000B2,
-				A000B3,
+				A000B2 /* Debug */,
+				A000B3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-	/* End XCConfigurationList section */
-
+/* End XCConfigurationList section */
 	};
-	rootObject = A000P0;
+	rootObject = A000P0 /* Project object */;
 }
