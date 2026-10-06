@@ -50,22 +50,15 @@ final class EmojiPickerWindow {
     }
 
     private func positionBelowStatusItem() {
-        guard let screen = NSScreen.main else { return }
-        let barHeight = NSStatusBar.system.thickness
-        guard let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength) else { return }
-        let rect = statusItem.button?.frame ?? CGRect(x: 0, y: screen.frame.maxY - 24, width: 40, height: 24)
-        let windowY = rect.maxY + barHeight + 4
-        let windowX = rect.minX + rect.width / 2 - 190
-        window?.setFrame(CGRect(x: windowX, y: windowY, width: 380, height: 460), display: true)
+        guard let screen = NSScreen.main, let window else { return }
+        let visible = screen.visibleFrame
+        let size = window.frame.size
+        let x = visible.maxX - size.width - 8
+        let y = visible.maxY - size.height - 8
+        window.setFrame(CGRect(x: x, y: y, width: size.width, height: size.height), display: true)
     }
 
     private func insert(_ emoji: EmojiItem) {
         AccessibilityInjector.insert(emoji)
-    }
-}
-
-extension EmojiPickerWindow: NSWindowDelegate {
-    nonisolated func windowDidResignMain(_ notification: Notification) {
-        // Don't close automatically
     }
 }

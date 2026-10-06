@@ -15,7 +15,7 @@ struct MenuBarRootView: View {
 
             Divider()
 
-            if !frequent.items.isEmpty {
+            if !frequent.items.isEmpty && settings.showFrequentInPicker {
                 Text("Frequent")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -32,6 +32,15 @@ struct MenuBarRootView: View {
                 }
                 .padding(.horizontal)
             }
+
+            Divider()
+
+            Button("Settings…") {
+                SettingsWindow.shared.show()
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
 
             Divider()
 
