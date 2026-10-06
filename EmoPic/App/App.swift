@@ -5,9 +5,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         EmojiDataManager.shared.loadEmojiData()
         FrequentEmojiStore.shared.update()
         EmojiShortcutMonitor.shared.start()
+        GlobalHotKey.shared.register()
     }
 
     func applicationWillTerminate(_: Notification) {
+        GlobalHotKey.shared.unregister()
         EmojiShortcutMonitor.shared.stop()
     }
 }

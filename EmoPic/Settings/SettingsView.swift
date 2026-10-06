@@ -58,6 +58,7 @@ struct SettingsView: View {
 
 private struct EmojiPickerSettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
+    @State private var hotKeyStatus: String = GlobalHotKey.shared.statusDescription
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -89,7 +90,52 @@ private struct EmojiPickerSettingsView: View {
 
             Toggle("Show Frequent in Picker", isOn: $settings.showFrequentInPicker)
                 .toggleStyle(.switch)
+
+            Divider()
+
+            SectionLabel("Global Hotkey")
+            HStack(spacing: 12) {
+                Picker("Open picker with", selection: hotKeyBinding) {
+                    ForEach(HotKeyOption.presets) { option in
+                        Text(option.label).tag(option.id)
+                    }
+                }
+                .labelsHidden()
+                .frame(maxWidth: 160)
+                .disabled(!settings.hotKeyEnabled)
+
+                Toggle("Enabled", isOn: $settings.hotKeyEnabled)
+                    .toggleStyle(.switch)
+                    .onChange(of: settings.hotKeyEnabled) {
+                        GlobalHotKey.shared.register()
+                        hotKeyStatus = GlobalHotKey.shared.statusDescription
+                    }
+
+                Spacer()
+            }
+
+            Text(hotKeyStatus)
+                .font(.caption)
+                .foregroundStyle(GlobalHotKey.shared.isRegistered || !settings.hotKeyEnabled ? Color.secondary : Color.red)
+
+            Text("⌘Space is reserved by Spotlight and ⌃⌘Space by the system Character Viewer, so they are not offered.")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
         }
+    }
+
+    /// Binding mapping the Picker's preset id onto the persisted keyCode/modifiers.
+    private var hotKeyBinding: Binding<String> {
+        Binding(
+            get: { settings.hotKeyOption.id },
+            set: { newID in
+                guard let option = HotKeyOption.presets.first(where: { $0.id == newID }) else { return }
+                settings.hotKeyCode = option.keyCode
+                settings.hotKeyModifiers = option.modifiers
+                GlobalHotKey.shared.register()
+                hotKeyStatus = GlobalHotKey.shared.statusDescription
+            }
+        )
     }
 }
 

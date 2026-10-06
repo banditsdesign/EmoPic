@@ -58,14 +58,14 @@ final class EmojiDataManager: ObservableObject {
     private func loadBundled() -> [EmojiItem]? {
         guard let url = Bundle.main.url(forResource: "emoji-data", withExtension: "json"),
               let data = try? Data(contentsOf: url) else { return nil }
-        return parseEmojiJSON(data)
+        return Self.parseEmojiJSON(data)
     }
 
     private func loadFromDiskCache() -> [EmojiItem]? {
         let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         let url = dir.appendingPathComponent("emopic-emoji-data.json")
         guard let data = try? Data(contentsOf: url) else { return nil }
-        return parseEmojiJSON(data)
+        return Self.parseEmojiJSON(data)
     }
 
     private func downloadFromGitHub(_ completion: @escaping () -> Void) {
@@ -73,7 +73,7 @@ final class EmojiDataManager: ObservableObject {
         let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         let cacheURL = dir.appendingPathComponent("emopic-emoji-data.json")
         let task = URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data, let items = self.parseEmojiJSON(data) else { return }
+            guard let data = data, let items = EmojiDataManager.parseEmojiJSON(data) else { return }
             try? data.write(to: cacheURL)
             DispatchQueue.main.async {
                 self.emojiList = items; self.rebuildIndexes(); self.loaded = true
@@ -83,11 +83,12 @@ final class EmojiDataManager: ObservableObject {
         task.resume()
     }
 
-    private func parseEmojiJSON(_ data: Data) -> [EmojiItem]? {
+    // Internal (not private) for unit-test access to the parsing surface.
+    static func parseEmojiJSON(_ data: Data) -> [EmojiItem]? {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return nil }
         return json.compactMap { j -> EmojiItem? in
             // Build the emoji character from the `unified` hex codepoint sequence
-            let emoji = emojiFromUnified(j["unified"] as? String ?? "")
+            let emoji = Self.emojiFromUnified(j["unified"] as? String ?? "")
             guard !emoji.isEmpty else { return nil }
             let name = j["name"] as? String ?? ""
             // Aliases: read from short_names array, fallback to short_name string
@@ -109,8 +110,8 @@ final class EmojiDataManager: ObservableObject {
     }
 
     /// Convert a unified hex codepoint sequence (e.g. "1F600" or "1F469-200D-1F469-200D-1F467-200D-1F467")
-    /// into a Unicode emoji string.
-    private func emojiFromUnified(_ unified: String) -> String {
+    /// into a Unicode emoji string. Internal (not private) for unit-test access.
+    static func emojiFromUnified(_ unified: String) -> String {
         let parts = unified.split(separator: "-").map { String($0).trimmingCharacters(in: .whitespaces) }
         guard !parts.isEmpty else { return "" }
         let codepoints = parts.compactMap { UInt32($0, radix: 16) }

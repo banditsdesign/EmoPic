@@ -6,6 +6,9 @@ final class EmojiPickerWindow {
 
     private var window: NSWindow?
 
+    /// App that was frontmost before the picker stole focus — emoji targets it.
+    private var previousApp: NSRunningApplication?
+
     func toggle() {
         if let w = window, w.isVisible {
             close()
@@ -15,6 +18,11 @@ final class EmojiPickerWindow {
     }
 
     func show() {
+        // Capture the insertion target *before* we activate and steal focus.
+        if window?.isVisible != true {
+            previousApp = NSWorkspace.shared.frontmostApplication
+        }
+
         if window == nil {
             window = NSWindow(
                 contentRect: CGRect(x: 0, y: 0, width: 380, height: 460),
@@ -59,6 +67,6 @@ final class EmojiPickerWindow {
     }
 
     private func insert(_ emoji: EmojiItem) {
-        AccessibilityInjector.insert(emoji)
+        AccessibilityInjector.insert(emoji, into: previousApp?.processIdentifier)
     }
 }
