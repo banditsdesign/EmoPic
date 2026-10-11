@@ -7,7 +7,18 @@ final class EmojiDataManager: ObservableObject {
     @Published private(set) var byCategory: [EmojiCategory: [EmojiItem]] = [:]
     @Published private(set) var aliasMap: [String: EmojiItem] = [:]
 
+    /// Every prefix of every alias/name, for O(1) "could this buffer still
+    /// match something?" checks on each keystroke in the colon monitor.
+    /// ~1,919 entries × a few short aliases → low megabytes, fine.
+    private var shortcutPrefixes: Set<String> = []
+
     private var loaded = false
+
+    /// True if any known emoji alias/name starts with `buffer`.
+    /// Used by EmojiShortcutMonitor to decide "keep buffering vs abort".
+    func hasPrefix(_ buffer: String) -> Bool {
+        shortcutPrefixes.contains(buffer.lowercased())
+    }
 
     func search(_ query: String, first count: Int = 20) -> [EmojiItem] {
         guard !query.isEmpty else { return [] }
@@ -126,17 +137,29 @@ final class EmojiDataManager: ObservableObject {
     }
 
     private func rebuildIndexes() {
-        byCategory = [:]; aliasMap = [:]
+        byCategory = [:]; aliasMap = [:]; shortcutPrefixes = []
         for e in emojiList {
             byCategory[e.category, default: []].append(e)
             for alias in e.aliases {
                 let k = alias.lowercased()
                 if aliasMap[k] == nil { aliasMap[k] = e }
+                insertPrefixes(of: k)
             }
             aliasMap[e.name.lowercased()] = e
+            insertPrefixes(of: e.name.lowercased())
         }
         for key in Array(byCategory.keys) {
             byCategory[key]?.sort { $0.name.lowercased() < $1.name.lowercased() }
+        }
+    }
+
+    /// Insert every prefix ("s", "sm", "smi", … , word) of a lowercase word.
+    private func insertPrefixes(of word: String) {
+        guard !word.isEmpty else { return }
+        var prefix = ""
+        for ch in word {
+            prefix.append(ch)
+            shortcutPrefixes.insert(prefix)
         }
     }
 }

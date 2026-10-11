@@ -3,6 +3,7 @@ import SwiftUI
 struct MenuBarRootView: View {
     @EnvironmentObject var settings: AppSettings
     @ObservedObject private var frequent = FrequentEmojiStore.shared
+    @ObservedObject private var monitor = EmojiShortcutMonitor.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -12,6 +13,25 @@ struct MenuBarRootView: View {
             .buttonStyle(.plain)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 6)
+
+            // T10: subtle hint while Accessibility access is missing — the
+            // colon feature is paused, the picker itself stays usable.
+            if !monitor.isAccessibilityGranted {
+                Button {
+                    monitor.requestPermissionIfNeeded()
+                    monitor.openAccessibilitySettings()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.shield")
+                            .foregroundStyle(.orange)
+                        Text("Accessibility access needed — Grant")
+                            .font(.caption)
+                        Spacer()
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.vertical, 4)
+            }
 
             Divider()
 

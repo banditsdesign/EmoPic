@@ -26,9 +26,11 @@
 		A10025 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000103 /* SettingsView.swift */; };
 		A10026 /* AXTextInserter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20010 /* AXTextInserter.swift */; };
 		A10027 /* GlobalHotKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20011 /* GlobalHotKey.swift */; };
+		A10028 /* ColonBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20012 /* ColonBuffer.swift */; };
 		B000BF1 /* EmojiParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R1 /* EmojiParsingTests.swift */; };
 		B000BF2 /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R2 /* AppSettingsTests.swift */; };
 		B000BF3 /* HotKeyOptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R3 /* HotKeyOptionTests.swift */; };
+		B000BF4 /* ColonBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R4 /* ColonBufferTests.swift */; };
 		A10020 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10021 /* ApplicationServices.framework */; };
 		A10022 /* emoji-data.json in Resources */ = {isa = PBXBuildFile; fileRef = A10023 /* emoji-data.json */; };
 /* End PBXBuildFile section */
@@ -52,11 +54,13 @@
 		A1001E /* AppSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		A20010 /* AXTextInserter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AXTextInserter.swift; sourceTree = "<group>"; };
 		A20011 /* GlobalHotKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalHotKey.swift; sourceTree = "<group>"; };
+		A20012 /* ColonBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonBuffer.swift; sourceTree = "<group>"; };
 		A000102 /* SettingsWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		A000103 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B000R1 /* EmojiParsingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiParsingTests.swift; sourceTree = "<group>"; };
 		B000R2 /* AppSettingsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
 		B000R3 /* HotKeyOptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HotKeyOptionTests.swift; sourceTree = "<group>"; };
+		B000R4 /* ColonBufferTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonBufferTests.swift; sourceTree = "<group>"; };
 		B000FP /* EmoPicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmoPicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1001F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10021 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
@@ -144,6 +148,7 @@
 			isa = PBXGroup;
 			children = (
 				A1001C /* EmojiShortcutMonitor.swift */,
+				A20012 /* ColonBuffer.swift */,
 				A20011 /* GlobalHotKey.swift */,
 			);
 			path = Shortcuts;
@@ -173,6 +178,7 @@
 				B000R1 /* EmojiParsingTests.swift */,
 				B000R2 /* AppSettingsTests.swift */,
 				B000R3 /* HotKeyOptionTests.swift */,
+				B000R4 /* ColonBufferTests.swift */,
 			);
 			path = EmoPicTests;
 			sourceTree = "<group>";
@@ -320,6 +326,7 @@
 				A10025 /* SettingsView.swift in Sources */,
 				A10026 /* AXTextInserter.swift in Sources */,
 				A10027 /* GlobalHotKey.swift in Sources */,
+				A10028 /* ColonBuffer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,6 +337,7 @@
 				B000BF1 /* EmojiParsingTests.swift in Sources */,
 				B000BF2 /* AppSettingsTests.swift in Sources */,
 				B000BF3 /* HotKeyOptionTests.swift in Sources */,
+				B000BF4 /* ColonBufferTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

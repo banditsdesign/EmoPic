@@ -175,7 +175,7 @@ private struct ColonShortcutsSettingsView: View {
 
             Divider()
 
-            Text("Type :smile:, :heart:, etc. to insert emoji. Currently works in EmoPic's own windows; cross-app support is planned.")
+            Text("Type :smile:, :heart:, etc. in any app's text field. Requires Accessibility access; skipped in excluded apps and password fields.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
