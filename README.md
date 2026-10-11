@@ -5,7 +5,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 ## Features
 
 - **Menu Bar Picker**: Click the emoji icon to open a searchable emoji picker
-- **Slack-style Shortcuts**: Type `:smile:` or `:thumbsup:` to insert emoji (currently limited to EmoPic's own windows — cross-app support via a global event tap is planned)
+- **Slack-style Shortcuts**: Type `:smile:` or `:thumbsup:` in any app's text field and it becomes 😄 (requires Accessibility permission, granted once)
 - **Skin Tone Support**: Pick your preferred skin tone for hand, person, and other emoji
 - **Light & Dark Mode**: Automatically follows your system appearance
 - **Frequently Used**: Your most-used emoji rise to the top
@@ -17,7 +17,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 Click the 🎨 emoji icon in your menu bar to open the picker window. Search or browse categories to find the emoji you want.
 
 ### Slack-style Shortcuts
-Type `:smile:` in a text field and it becomes 😄. **Current scope:** the shortcut monitor uses an app-local event monitor, so replacement happens only in EmoPic's own text fields. Cross-app replacement (global `CGEventTap` + Accessibility text APIs) is the next milestone — see [docs/NEXT_STEPS_PLAN.md](docs/NEXT_STEPS_PLAN.md).
+Type `:smile:` in a text field **in any app** and it becomes 😄. The monitor is a system-wide event tap: characters always type through, and the typed pattern is swapped for the emoji on confirm (closing `:`, space, tab, or Enter) via the Accessibility API — if the target app rejects the write, your literal `:smile:` stays untouched, nothing is ever swallowed. Grant Accessibility access when prompted (System Settings → Privacy & Security → Accessibility); the feature activates without relaunch. Excluded apps (set in Preferences) and secure password fields are skipped.
 
 ### Keyboard Shortcuts
 - `⌥⌘E` - Toggle the emoji picker window (global hotkey, works in any app — presets configurable in Settings)
@@ -35,7 +35,7 @@ EmoPic/
 ├── MenuBar/                # Menu bar status item, menu
 ├── Picker/                 # Emoji picker SwiftUI view
 ├── Emoji/                  # Emoji data model, loading, categories
-├── Shortcuts/              # Slack-style colon shortcut detection
+├── Shortcuts/              # Colon shortcuts (session CGEventTap) + global hotkey
 ├── Insertion/              # Accessibility-based text insertion
 ├── Settings/               # Preferences, frequent emojis
 └── Utilities/              # App-wide utilities
