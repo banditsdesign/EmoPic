@@ -51,6 +51,55 @@ final class EmojiDataManager: ObservableObject {
         return aliasMap[q] ?? search(q, first: 1).first
     }
 
+    /// Ranked autocomplete candidates for a partially typed colon shortcut,
+    /// used by the Slack-style suggestion popup. Order: exact alias, then
+    /// alias-prefix matches (recently-used first, then shorter, then alpha),
+    /// then name-substring fillers. Never returns duplicate emoji.
+    func suggestions(forPrefix prefix: String, limit: Int = 8) -> [EmojiSuggestion] {
+        let q = prefix.lowercased()
+        guard !q.isEmpty else { return [] }
+
+        var used = Set<String>()   // emoji ids already claimed
+        var out: [EmojiSuggestion] = []
+
+        func add(_ item: EmojiItem?, alias: String) {
+            guard out.count < limit, let item, used.insert(item.id).inserted else { return }
+            out.append(EmojiSuggestion(id: item.id, emoji: item, shortname: alias))
+        }
+
+        // 1. Exact alias match.
+        add(aliasMap[q], alias: q)
+
+        // 2. Alias prefixes, boosted by recency (FrequentEmojiStore order).
+        let recentRank = Dictionary(
+            uniqueKeysWithValues: FrequentEmojiStore.shared.items.enumerated().map { ($0.element.id, $0.offset) }
+        )
+        let aliasHits = aliasMap.keys.filter { $0.hasPrefix(q) && $0 != q }
+            .sorted { a, b in
+                let ea = aliasMap[a]!, eb = aliasMap[b]!
+                let ra = recentRank[ea.id] ?? .max, rb = recentRank[eb.id] ?? .max
+                if ra != rb { return ra < rb }
+                if a.count != b.count { return a.count < b.count }
+                return a < b
+            }
+        for alias in aliasHits { add(aliasMap[alias], alias: alias) }
+
+        // 3. Name-substring fillers while slots remain.
+        if out.count < limit {
+            let nameHits = emojiList
+                .filter { $0.name.lowercased().contains(q) }
+                .sorted {
+                    let ra = recentRank[$0.id] ?? .max, rb = recentRank[$1.id] ?? .max
+                    if ra != rb { return ra < rb }
+                    return $0.name.lowercased() < $1.name.lowercased()
+                }
+            for e in nameHits {
+                add(e, alias: (e.aliases.first ?? e.name).lowercased())
+            }
+        }
+        return out
+    }
+
     func loadEmojiData() {
         guard !loaded else { return }
         // Try bundled JSON first, then downloaded from GitHub

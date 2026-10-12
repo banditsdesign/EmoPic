@@ -97,3 +97,11 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
         )
     }
 }
+
+/// One row in the colon-shortcut suggestion popup: the emoji plus the
+/// alias that matched what the user typed (displayed as `:shortname:`).
+struct EmojiSuggestion: Identifiable, Equatable {
+    let id: String
+    let emoji: EmojiItem
+    let shortname: String
+}

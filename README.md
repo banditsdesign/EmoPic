@@ -5,7 +5,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 ## Features
 
 - **Menu Bar Picker**: Click the emoji icon to open a searchable emoji picker
-- **Slack-style Shortcuts**: Type `:smile:` or `:thumbsup:` in any app's text field and it becomes 😄 (requires Accessibility permission, granted once)
+- **Slack-style Shortcuts**: Type `:smi` in any app's text field and a suggestion popup appears at the caret — navigate with `↑`/`↓`, insert with `Enter`/`Tab` or click (requires Accessibility permission, granted once)
 - **Skin Tone Support**: Pick your preferred skin tone for hand, person, and other emoji
 - **Light & Dark Mode**: Automatically follows your system appearance
 - **Frequently Used**: Your most-used emoji rise to the top
@@ -17,7 +17,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 Click the 🎨 emoji icon in your menu bar to open the picker window. Search or browse categories to find the emoji you want.
 
 ### Slack-style Shortcuts
-Type `:smile:` in a text field **in any app** and it becomes 😄. The monitor is a system-wide event tap: characters always type through, and the typed pattern is swapped for the emoji on confirm (closing `:`, space, tab, or Enter) via the Accessibility API — if the target app rejects the write, your literal `:smile:` stays untouched, nothing is ever swallowed. Grant Accessibility access when prompted (System Settings → Privacy & Security → Accessibility); the feature activates without relaunch. Excluded apps (set in Preferences) and secure password fields are skipped.
+Type `:smi` in a text field **in any app** and a suggestion popup appears at the caret with matching emoji. `↑`/`↓` move the highlight, `Enter`/`Tab` or a click inserts the highlighted pick, `Esc` dismisses. You can still just keep typing the full `:smile:` and the closing `:` confirms the top match — the pattern is swapped for the emoji via the Accessibility API. The monitor is a system-wide event tap: characters always type through, and if the AX write fails your literal text stays untouched, nothing is ever swallowed. Grant Accessibility access when prompted (System Settings → Privacy & Security → Accessibility); the feature activates without relaunch. Excluded apps (set in Preferences) and secure password fields are skipped. The popup can be turned off in Settings → Colon Shortcuts to leave only the closing-`:` inline behaviour.
 
 ### Keyboard Shortcuts
 - `⌥⌘E` - Toggle the emoji picker window (global hotkey, works in any app — presets configurable in Settings)

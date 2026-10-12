@@ -18,6 +18,10 @@ final class EmojiPickerWindow {
     }
 
     func show() {
+        // The caret suggestion popup belongs to another app's text context;
+        // it has no business floating over our own picker.
+        ColonSuggestionPanel.shared.hide()
+
         // Capture the insertion target *before* we activate and steal focus.
         if window?.isVisible != true {
             previousApp = NSWorkspace.shared.frontmostApplication

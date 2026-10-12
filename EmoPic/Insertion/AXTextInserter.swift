@@ -83,6 +83,34 @@ enum AXTextInserter {
 
     // MARK: - Focused element lookup
 
+    /// Screen-space bounds of the caret (or current selection) in `pid`'s
+    /// focused text element. Returned in AX global coordinates, i.e. origin
+    /// at the top-left of the primary display, y growing downward — same
+    /// space as `CGEvent` locations. Callers must convert to AppKit's
+    /// bottom-left origin before positioning a window.
+    /// Returns nil when the app exposes no writable/caret info; callers
+    /// should fall back to the mouse location.
+    static func caretBounds(at pid: pid_t) -> CGRect? {
+        guard let element = focusedTextElement(for: pid) else { return nil }
+        guard let range = selectedRange(of: element) else { return nil }
+
+        // Parameterized AXBoundsForRange: caret (zero-length) first, then
+        // the real selection length if the app refuses zero-length queries.
+        var rect = CGRect.zero
+        for length in [0, range.length] where length >= 0 {
+            var cfRange = CFRange(location: range.location, length: length)
+            guard let rangeValue = AXValueCreate(.cfRange, &cfRange) else { continue }
+            var boundsValue: CFTypeRef?
+            guard AXUIElementCopyParameterizedAttributeValue(
+                element, kAXBoundsForRangeParameterizedAttribute as CFString, rangeValue, &boundsValue
+            ) == .success, let axValue = boundsValue,
+            CFGetTypeID(axValue) == AXValueGetTypeID(),
+            AXValueGetValue(axValue as! AXValue, .cgRect, &rect) else { continue }
+            return rect
+        }
+        return nil
+    }
+
     /// The focused element of `pid` if it is a writable text target.
     static func focusedTextElement(for pid: pid_t) -> AXUIElement? {
         guard pid > 0, NSRunningApplication(processIdentifier: pid) != nil else { return nil }

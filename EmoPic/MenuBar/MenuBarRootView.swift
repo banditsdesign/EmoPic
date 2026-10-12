@@ -80,6 +80,12 @@ struct MenuBarRootView: View {
             .buttonStyle(.plain)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .onAppear {
+            // Re-check trust when the panel opens: after the user grants in
+            // System Settings, this is the fastest feedback loop — the hint
+            // row disappears and the tap starts without an app switch.
+            monitor.refreshAccessibilityStatus()
+        }
     }
 
     private func insert(_ emoji: EmojiItem) {

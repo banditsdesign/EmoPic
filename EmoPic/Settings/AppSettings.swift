@@ -43,6 +43,11 @@ final class AppSettings: ObservableObject {
         didSet { if !isLoading { self.save() } }
     }
 
+    /// Show the Slack-style suggestion popup while typing :shortcod…
+    @Published var showColonSuggestions: Bool = true {
+        didSet { if !isLoading { self.save() } }
+    }
+
     @Published var showFrequentInPicker: Bool = true {
         didSet { if !isLoading { self.save() } }
     }
@@ -104,6 +109,7 @@ final class AppSettings: ObservableObject {
         static let enabledCategories = "enabledCategories"
         static let excludedApps = "excludedApps"
         static let enableColonShortcuts = "enableColonShortcuts"
+        static let showColonSuggestions = "showColonSuggestions"
         static let showFrequent = "showFrequentInPicker"
         static let hotKeyCode = "hotKeyCode"
         static let hotKeyModifiers = "hotKeyModifiers"
@@ -120,6 +126,7 @@ final class AppSettings: ObservableObject {
         suite.set(enabledCategories, forKey: Keys.enabledCategories)
         suite.set(excludedApps, forKey: Keys.excludedApps)
         suite.set(enableColonShortcuts, forKey: Keys.enableColonShortcuts)
+        suite.set(showColonSuggestions, forKey: Keys.showColonSuggestions)
         suite.set(showFrequentInPicker, forKey: Keys.showFrequent)
         suite.set(hotKeyCode, forKey: Keys.hotKeyCode)
         suite.set(hotKeyModifiers, forKey: Keys.hotKeyModifiers)
@@ -137,6 +144,7 @@ final class AppSettings: ObservableObject {
         enabledCategories = suite.array(forKey: Keys.enabledCategories) as? [EmojiCategory.RawValue] ?? EmojiCategory.allCases.map(\.rawValue)
         excludedApps = suite.array(forKey: Keys.excludedApps) as? [String] ?? Self.defaultExcludedApps
         enableColonShortcuts = suite.object(forKey: Keys.enableColonShortcuts) as? Bool ?? true
+        showColonSuggestions = suite.object(forKey: Keys.showColonSuggestions) as? Bool ?? true
         showFrequentInPicker = suite.object(forKey: Keys.showFrequent) as? Bool ?? true
         hotKeyCode = suite.object(forKey: Keys.hotKeyCode) as? Int ?? HotKeyOption.defaultOption.keyCode
         hotKeyModifiers = suite.object(forKey: Keys.hotKeyModifiers) as? Int ?? HotKeyOption.defaultOption.modifiers

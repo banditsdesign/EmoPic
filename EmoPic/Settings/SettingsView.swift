@@ -152,6 +152,10 @@ private struct ColonShortcutsSettingsView: View {
             Toggle("Enable :shortcut: replacement", isOn: $settings.enableColonShortcuts)
                 .toggleStyle(.switch)
 
+            Toggle("Show suggestion popup while typing", isOn: $settings.showColonSuggestions)
+                .toggleStyle(.switch)
+                .disabled(!settings.enableColonShortcuts)
+
             SectionLabel("Skin Tone for Shortcuts")
             HStack(spacing: 8) {
                 ForEach(SkinTone.allCases) { tone in
@@ -175,7 +179,7 @@ private struct ColonShortcutsSettingsView: View {
 
             Divider()
 
-            Text("Type :smile:, :heart:, etc. in any app's text field. Requires Accessibility access; skipped in excluded apps and password fields.")
+            Text("Type :smile:, :heart:, etc. in any app's text field — a suggestion popup appears at the caret; Enter/Tab inserts the highlighted pick, ↑/↓ navigates, Esc dismisses. Typing the closing : also confirms. Requires Accessibility access; skipped in excluded apps and password fields.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
