@@ -65,6 +65,12 @@ final class AppSettings: ObservableObject {
         didSet { if !isLoading { self.save() } }
     }
 
+    /// Last-opened Settings pane rawValue; the window restores it and titles
+    /// itself for its pane ("restore the last pane" — apple-hig settings.md).
+    @Published var settingsTab: String = "Emoji Picker" {
+        didSet { if !isLoading { self.save() } }
+    }
+
     // MARK: - Convenience
 
     var usesSkinTone: Bool { selectedSkinTone != .default }
@@ -114,6 +120,7 @@ final class AppSettings: ObservableObject {
         static let hotKeyCode = "hotKeyCode"
         static let hotKeyModifiers = "hotKeyModifiers"
         static let hotKeyEnabled = "hotKeyEnabled"
+        static let settingsTab = "settingsTab"
     }
 
     // MARK: - Persistence
@@ -131,6 +138,7 @@ final class AppSettings: ObservableObject {
         suite.set(hotKeyCode, forKey: Keys.hotKeyCode)
         suite.set(hotKeyModifiers, forKey: Keys.hotKeyModifiers)
         suite.set(hotKeyEnabled, forKey: Keys.hotKeyEnabled)
+        suite.set(settingsTab, forKey: Keys.settingsTab)
         // Flush synchronously so writes are visible to other UserDefaults
         // instances for the same suite (e.g. after relaunch, or in tests).
         suite.synchronize()
@@ -149,5 +157,6 @@ final class AppSettings: ObservableObject {
         hotKeyCode = suite.object(forKey: Keys.hotKeyCode) as? Int ?? HotKeyOption.defaultOption.keyCode
         hotKeyModifiers = suite.object(forKey: Keys.hotKeyModifiers) as? Int ?? HotKeyOption.defaultOption.modifiers
         hotKeyEnabled = suite.object(forKey: Keys.hotKeyEnabled) as? Bool ?? true
+        settingsTab = suite.string(forKey: Keys.settingsTab) ?? "Emoji Picker"
     }
 }
