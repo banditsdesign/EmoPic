@@ -33,7 +33,9 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 
     /// Fixed pane size — every pane uses it so switching never resizes or
     /// shifts anything ("panes fit their content", settings.md).
-    static let paneSize = NSSize(width: 480, height: 360)
+    // 420 tall: the Startup section added on top of the previous
+    // skin-tone/frequent/hotkey stack; clipped at 360 with the toolbar row.
+    static let paneSize = NSSize(width: 480, height: 420)
 
     @ViewBuilder
     func paneView() -> some View {
@@ -54,6 +56,9 @@ struct EmojiPickerSettingsView: View {
     @State private var loginItemError: String?
 
     var body: some View {
+        // Tallest pane: scrollable so content is reachable even if it ever
+        // exceeds the fixed window (overlay indicators hide when it fits).
+        ScrollView(.vertical, showsIndicators: false) {
         VStack(alignment: .leading, spacing: 16) {
             SectionLabel("Startup")
             Toggle("Launch at login", isOn: launchAtLoginBinding)
@@ -132,11 +137,10 @@ struct EmojiPickerSettingsView: View {
             Text("⌘Space is reserved by Spotlight and ⌃⌘Space by the system Character Viewer, so they are not offered.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
-
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(20)
+        .frame(minWidth: 480, minHeight: 380)
+        }
     }
 
     /// Toggle backed by `SMAppService.mainApp` (macOS 13+). Only updates

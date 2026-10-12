@@ -57,7 +57,14 @@ final class SettingsWindow {
         // is the same fixed size (settings.md).
         window.styleMask = [.titled, .closable]
         window.isReleasedWhenClosed = false
-        window.toolbarStyle = .preference // centered icon-over-label panes
+        // .expanded (not .preference): title renders on its own titlebar
+        // row (the pane name — the earlier .preference assembly left the
+        // title as "Untitled"), the tab strip sits on the toolbar row, and
+        // pane content begins strictly below it. With the earlier setup the
+        // unified chrome consumed content height: the first control of the
+        // Startup pane hid under the strip and the hotkey status clipped at
+        // the bottom edge of a non-resizable window.
+        window.toolbarStyle = .expanded
         window.tabbingMode = .disallowed
         window.setContentSize(SettingsTab.paneSize)
 
