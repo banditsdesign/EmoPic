@@ -3,6 +3,7 @@ import Cocoa
 
 struct EmojiPickerView: View {
     @ObservedObject private var dataManager = EmojiDataManager.shared
+    @ObservedObject private var settings = AppSettings.shared
     @State private var query: String = ""
     @State private var selectedCategory: EmojiCategory = .smileys
     @State private var selectedEmoji: EmojiItem?
@@ -26,11 +27,20 @@ struct EmojiPickerView: View {
             Picker("", selection: $searchMode) {
                 Text("Search").tag(SearchMode.search)
                 Text("Categories").tag(SearchMode.category)
-                Text("Frequent").tag(SearchMode.frequent)
+                // Setting now controls what its label says: the Frequent tab
+                // in the picker (the menu bar no longer lists emoji at all).
+                if settings.showFrequentInPicker {
+                    Text("Frequent").tag(SearchMode.frequent)
+                }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
             .padding(.top, 8)
+            .onChange(of: settings.showFrequentInPicker) { visible in
+                if !visible && searchMode == .frequent {
+                    searchMode = .search
+                }
+            }
 
             if searchMode == .search {
                 TextField("Search emoji...", text: $query)

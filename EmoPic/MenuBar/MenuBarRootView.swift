@@ -1,94 +1,54 @@
 import SwiftUI
 
+/// Menu bar dropdown content, rendered as a *native* NSMenu through
+/// `.menuBarExtraStyle(.menu)`.
+///
+/// Apple's "The menu bar" guidance (apple-hig skill, `the-menu-bar.md`):
+/// **"Display a menu — not a popover — when people click it."** The old
+/// `.window` style hosted custom-styled buttons, which is why items had no
+/// standard padding and no hover highlight. A native menu provides the
+/// system metrics, accent-colored mouseover selection, separators, and
+/// shortcut display for free — exactly what people expect on macOS.
+///
+/// Frequent emoji intentionally do not appear here: recency is surfaced in
+/// the picker's Frequent tab and in colon-suggestion ranking, keeping this
+/// menu short and scannable ("Be mindful of menu length", menus.md).
 struct MenuBarRootView: View {
-    @EnvironmentObject var settings: AppSettings
-    @ObservedObject private var frequent = FrequentEmojiStore.shared
     @ObservedObject private var monitor = EmojiShortcutMonitor.shared
 
     var body: some View {
-        VStack(spacing: 0) {
-            Button("Open Emoji Picker") {
-                EmojiPickerWindow.shared.toggle()
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 6)
-
-            // T10: subtle hint while Accessibility access is missing — the
-            // colon feature is paused, the picker itself stays usable.
-            if !monitor.isAccessibilityGranted {
-                Button {
-                    monitor.requestPermissionIfNeeded()
-                    monitor.openAccessibilitySettings()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "lock.shield")
-                            .foregroundStyle(.orange)
-                        Text("Accessibility access needed — Grant")
-                            .font(.caption)
-                        Spacer()
-                    }
-                }
-                .buttonStyle(.plain)
-                .padding(.vertical, 4)
-            }
-
-            Divider()
-
-            if !frequent.items.isEmpty && settings.showFrequentInPicker {
-                Text("Frequent")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
-                    .padding(.top, 4)
-
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
-                    ForEach(frequent.items.prefix(4)) { emoji in
-                        Button { insert(emoji) } label: {
-                            Text(emoji.emoji).font(.system(size: 22)).frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal)
-            }
-
-            Divider()
-
-            Button("Settings…") {
-                SettingsWindow.shared.show()
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 6)
-
-            Divider()
-
-            HStack {
-                Text("EmoPic").font(.subheadline.bold())
-                Spacer()
-                Text(VersionInfo.version).font(.caption).foregroundStyle(.secondary)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 4)
-
-            Divider()
-
-            Button("Quit EmoPic", role: .destructive) {
-                NSApplication.shared.terminate(nil)
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        Button("Open Emoji Picker") {
+            EmojiPickerWindow.shared.toggle()
         }
-        .onAppear {
-            // Re-check trust when the panel opens: after the user grants in
-            // System Settings, this is the fastest feedback loop — the hint
-            // row disappears and the tap starts without an app switch.
-            monitor.refreshAccessibilityStatus()
-        }
-    }
 
-    private func insert(_ emoji: EmojiItem) {
-        AccessibilityInjector.insert(emoji)
+        // T10: subtle hint while Accessibility access is missing — the colon
+        // feature is paused, the picker itself stays usable. The grant
+        // observer in EmojiShortcutMonitor refreshes this as soon as the
+        // user returns from System Settings.
+        if !monitor.isAccessibilityGranted {
+            Button {
+                monitor.requestPermissionIfNeeded()
+                monitor.openAccessibilitySettings()
+            } label: {
+                Label("Accessibility access needed", systemImage: "lock.shield")
+            }
+        }
+
+        Divider()
+
+        Button("Settings…") {
+            SettingsWindow.shared.show()
+        }
+        .keyboardShortcut(",", modifiers: .command)
+
+        Divider()
+
+        // Minimal info footer; plain Text renders as a disabled menu item.
+        Text("EmoPic \(VersionInfo.version)")
+
+        Button("Quit EmoPic") {
+            NSApplication.shared.terminate(nil)
+        }
+        .keyboardShortcut("q", modifiers: .command)
     }
 }

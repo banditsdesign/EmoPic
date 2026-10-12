@@ -90,6 +90,9 @@ private struct EmojiPickerSettingsView: View {
 
             Toggle("Show Frequent in Picker", isOn: $settings.showFrequentInPicker)
                 .toggleStyle(.switch)
+            Text("Adds a Frequent tab with your most-used emoji to the picker window.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
             Divider()
 
