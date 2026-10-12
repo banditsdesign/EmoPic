@@ -25,6 +25,7 @@ final class SettingsWindow {
     func show() {
         if window == nil { build() }
         NSApp.activate(ignoringOtherApps: true)
+        window?.title = "Settings"   // reassert: some AppKit phase blanked it
         window?.makeKeyAndOrderFront(nil)
     }
 
@@ -73,16 +74,27 @@ final class SettingsWindow {
             $0.rawValue == AppSettings.shared.settingsTab
         } ?? 0
         controller.selectedTabViewItemIndex = last
-        window.title = SettingsTab.allCases[last].rawValue
-        controller.onTabChange = { [weak window] paneTitle in
-            // "title the window for its pane" — kept live on every switch.
-            window?.title = paneTitle
+
+        // Title: plain "Settings" (matches the ⌘, menu item people read).
+        // Per-pane titling was unreliable in this assembly — the title kept
+        // reverting to "Untitled" — so pin one honest title and reassert it
+        // whenever the window appears, whatever AppKit does in between.
+        window.title = "Settings"
+        window.titleVisibility = .visible
+        controller.onTabChange = { paneTitle in
             AppSettings.shared.settingsTab = paneTitle
         }
 
         self.window = window
         self.tabController = controller
-        window.center()
+        if window.frameAutosaveName.isEmpty {
+            // Remember user-moved position across launches (settings.md:
+            // "people expect a window to reopen where they left it").
+            window.setFrameAutosaveName("EmoPicSettingsWindow")
+            if !window.setFrameUsingName("EmoPicSettingsWindow") {
+                window.center()
+            }
+        }
     }
 }
 

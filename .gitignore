@@ -4,3 +4,6 @@ xcuserdata/
 build/
 DerivedData/
 *.xcarchive
+
+# Build artifacts
+*.dmg
