@@ -111,4 +111,16 @@ final class EmojiParsingTests: XCTestCase {
         XCTAssertEqual(EmojiCategory.from(group: "Flags"), .flags)
         XCTAssertEqual(EmojiCategory.from(group: "???"), .symbols) // unknown → symbols
     }
+
+    // MARK: - Skin-tone variants
+
+    /// Tone variants must keep the BASE emoji's id: the colon monitor records
+    /// the toned item after insertion, and a tone-suffixed id ("👋🏿") matches
+    /// no dataset entry — it would silently drop out of the recents list.
+    func testSkinToneVariantKeepsBaseID() {
+        let base = EmojiItem(emoji: "👋", name: "waving hand", aliases: ["wave"], version: "1.0", category: .people)
+        let toned = base.withSkinTone(.dark)
+        XCTAssertEqual(toned.id, base.id)
+        XCTAssertEqual(toned.emoji, "👋🏿")
+    }
 }

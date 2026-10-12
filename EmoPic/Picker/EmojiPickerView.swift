@@ -11,8 +11,11 @@ struct EmojiPickerView: View {
 
     // Skin tone picker
     @State private var skinToneEmoji: EmojiItem?
+    /// id of the tone-capable emoji whose chooser is open — the single
+    /// source of truth for BOTH grid cells and search rows, so only one
+    /// popover can ever be presented (review B3: a shared isPresented bool
+    /// once let every grid cell try to present at the same time).
     @State private var skinToneSourceID: String?
-    @State private var showSkinTonePicker = false
     /// id of the search row currently showing the tone chooser — keyed per
     /// row so all rows don't present the popover at once.
     @State private var searchSkinToneID: String?
@@ -29,7 +32,6 @@ struct EmojiPickerView: View {
             } else {
                 skinToneSourceID = emoji.id
                 skinToneEmoji = emoji
-                showSkinTonePicker = true
             }
         } else {
             onSelect(emoji)
@@ -215,6 +217,9 @@ struct EmojiPickerView: View {
             }
         }
         .buttonStyle(.plain)
+        // Scoped cursor change via push/pop — SwiftUI has no .pointOnHover()
+        // on macOS (checked the Xcode 27 SDK interface), and set()/set()
+        // alternatives clobber cursors owned by other views.
         .onHover { hovering in
             if hovering {
                 NSCursor.pointingHand.push()
@@ -223,14 +228,16 @@ struct EmojiPickerView: View {
             }
         }
         .popover(
-            isPresented: $showSkinTonePicker,
+            isPresented: Binding(
+                get: { skinToneSourceID == emoji.id },
+                set: { if !$0 { skinToneEmoji = nil; skinToneSourceID = nil } }
+            ),
             attachmentAnchor: .point(.top),
             arrowEdge: .bottom
         ) {
             skinToneChooser {
                 skinToneEmoji = nil
                 skinToneSourceID = nil
-                showSkinTonePicker = false
             }
         }
         .onChange(of: skinToneEmoji) {

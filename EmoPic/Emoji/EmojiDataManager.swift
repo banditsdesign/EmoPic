@@ -12,6 +12,16 @@ final class EmojiDataManager: ObservableObject {
     /// ~1,919 entries × a few short aliases → low megabytes, fine.
     private var shortcutPrefixes: Set<String> = []
 
+    /// All alias keys, sorted once at load. The suggestion query finds its
+    /// hits as one contiguous run via a binary search instead of filtering
+    /// and sorting every key on each keystroke (docs/CODE_REVIEW_2026-10-12.md O1).
+    private var sortedAliases: [String] = []
+
+    /// id → item, plus emoji → item (recents may be recorded as either
+    /// form). Lets FrequentEmojiStore resolve recents in O(1) per id
+    /// instead of scanning the full list per recent (O4).
+    private(set) var itemByID: [String: EmojiItem] = [:]
+
     private var loaded = false
 
     /// True if any known emoji alias/name starts with `buffer`.
@@ -29,7 +39,7 @@ final class EmojiDataManager: ObservableObject {
             .filter { $0.1 > 0 }
             .sorted { a, b in
                 if a.1 != b.1 { return a.1 > b.1 }
-                return a.0.name.lowercased() < b.0.name.lowercased()
+                return a.0.nameLower < b.0.nameLower
             }
             .prefix(count).map { $0.0 }
     }
@@ -39,7 +49,7 @@ final class EmojiDataManager: ObservableObject {
     func sortedByFrequency(_ count: Int = 50) -> [EmojiItem] {
         emojiList.sorted {
             if $0.usageScore != $1.usageScore { return $0.usageScore > $1.usageScore }
-            return $0.name.lowercased() < $1.name.lowercased()
+            return $0.nameLower < $1.nameLower
         }.prefix(count).map { $0 }
     }
 
@@ -55,6 +65,11 @@ final class EmojiDataManager: ObservableObject {
     /// used by the Slack-style suggestion popup. Order: exact alias, then
     /// alias-prefix matches (recently-used first, then shorter, then alpha),
     /// then name-substring fillers. Never returns duplicate emoji.
+    ///
+    /// Hot path: runs once per keystroke inside the event tap, so all heavy
+    /// structures (sorted alias index, lowercase search fields, recency
+    /// ranks) are precomputed and the query itself is a binary search plus a
+    /// small sort (docs/CODE_REVIEW_2026-10-12.md O1).
     func suggestions(forPrefix prefix: String, limit: Int = 8) -> [EmojiSuggestion] {
         let q = prefix.lowercased()
         guard !q.isEmpty else { return [] }
@@ -70,48 +85,68 @@ final class EmojiDataManager: ObservableObject {
         // 1. Exact alias match.
         add(aliasMap[q], alias: q)
 
-        // 2. Alias prefixes, boosted by recency (FrequentEmojiStore order).
-        let recentRank = Dictionary(
-            uniqueKeysWithValues: FrequentEmojiStore.shared.items.enumerated().map { ($0.element.id, $0.offset) }
-        )
-        let aliasHits = aliasMap.keys.filter { $0.hasPrefix(q) && $0 != q }
-            .sorted { a, b in
+        // 2. Alias prefixes, boosted by recency (FrequentEmojiStore rank).
+        // Prefix hits form one contiguous run in `sortedAliases`: binary
+        // search its start, walk the run, then sort just the hits.
+        if out.count < limit {
+            var aliasHits: [String] = []
+            var lo = 0, hi = sortedAliases.count
+            while lo < hi {
+                let mid = (lo + hi) / 2
+                if sortedAliases[mid] < q { lo = mid + 1 } else { hi = mid }
+            }
+            var i = lo
+            while i < sortedAliases.count, sortedAliases[i].hasPrefix(q) {
+                if sortedAliases[i] != q { aliasHits.append(sortedAliases[i]) }
+                i += 1
+            }
+            aliasHits.sort { a, b in
                 let ea = aliasMap[a]!, eb = aliasMap[b]!
-                let ra = recentRank[ea.id] ?? .max, rb = recentRank[eb.id] ?? .max
+                let ra = FrequentEmojiStore.shared.rank(of: ea.id)
+                let rb = FrequentEmojiStore.shared.rank(of: eb.id)
                 if ra != rb { return ra < rb }
                 if a.count != b.count { return a.count < b.count }
                 return a < b
             }
-        for alias in aliasHits { add(aliasMap[alias], alias: alias) }
+            for alias in aliasHits {
+                if out.count >= limit { break }
+                add(aliasMap[alias], alias: alias)
+            }
+        }
 
         // 3. Name-substring fillers while slots remain.
         if out.count < limit {
             let nameHits = emojiList
-                .filter { $0.name.lowercased().contains(q) }
+                .filter { $0.nameLower.contains(q) }
                 .sorted {
-                    let ra = recentRank[$0.id] ?? .max, rb = recentRank[$1.id] ?? .max
+                    let ra = FrequentEmojiStore.shared.rank(of: $0.id)
+                    let rb = FrequentEmojiStore.shared.rank(of: $1.id)
                     if ra != rb { return ra < rb }
-                    return $0.name.lowercased() < $1.name.lowercased()
+                    return $0.nameLower < $1.nameLower
                 }
             for e in nameHits {
+                if out.count >= limit { break }
                 add(e, alias: (e.aliases.first ?? e.name).lowercased())
             }
         }
         return out
     }
 
+    /// Loads the dataset fully offline: bundled JSON first, then a legacy
+    /// on-disk cache from the era when the app downloaded the dataset at
+    /// runtime (that path was removed — see docs/CODE_REVIEW_2026-10-12.md
+    /// S1: the app should trust nothing but its own signed bundle).
+    /// If both are missing the UI starts empty rather than fetching anything.
     func loadEmojiData() {
         guard !loaded else { return }
-        // Try bundled JSON first, then downloaded from GitHub
         if let items = loadBundled() {
             emojiList = items; rebuildIndexes(); loaded = true; return
         }
         if let items = loadFromDiskCache() {
-            emojiList = items; rebuildIndexes(); loaded = true; return
-        }
-        downloadFromGitHub { [weak self] in
-            guard let self, let items = self.loadFromDiskCache() else { return }
-            self.emojiList = items; self.rebuildIndexes(); self.loaded = true
+            emojiList = items; rebuildIndexes(); loaded = true
+            // Late load (bundled JSON missing) — recents mapped over an empty
+            // list at launch; refresh them now that the dataset exists.
+            FrequentEmojiStore.shared.update()
         }
     }
 
@@ -126,21 +161,6 @@ final class EmojiDataManager: ObservableObject {
         let url = dir.appendingPathComponent("emopic-emoji-data.json")
         guard let data = try? Data(contentsOf: url) else { return nil }
         return Self.parseEmojiJSON(data)
-    }
-
-    private func downloadFromGitHub(_ completion: @escaping () -> Void) {
-        let url = URL(string: "https://raw.githubusercontent.com/iamcal/emoji-data/master/emoji.json")!
-        let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-        let cacheURL = dir.appendingPathComponent("emopic-emoji-data.json")
-        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data, let items = EmojiDataManager.parseEmojiJSON(data) else { return }
-            try? data.write(to: cacheURL)
-            DispatchQueue.main.async {
-                self.emojiList = items; self.rebuildIndexes(); self.loaded = true
-                completion()
-            }
-        }
-        task.resume()
     }
 
     // Internal (not private) for unit-test access to the parsing surface.
@@ -187,18 +207,23 @@ final class EmojiDataManager: ObservableObject {
 
     private func rebuildIndexes() {
         byCategory = [:]; aliasMap = [:]; shortcutPrefixes = []
+        itemByID = [:]
         for e in emojiList {
             byCategory[e.category, default: []].append(e)
+            // Recents may be stored as either the item id or the raw emoji.
+            itemByID[e.id] = e
+            if itemByID[e.emoji] == nil { itemByID[e.emoji] = e }
             for alias in e.aliases {
                 let k = alias.lowercased()
                 if aliasMap[k] == nil { aliasMap[k] = e }
                 insertPrefixes(of: k)
             }
-            aliasMap[e.name.lowercased()] = e
-            insertPrefixes(of: e.name.lowercased())
+            aliasMap[e.nameLower] = e
+            insertPrefixes(of: e.nameLower)
         }
+        sortedAliases = aliasMap.keys.sorted()
         for key in Array(byCategory.keys) {
-            byCategory[key]?.sort { $0.name.lowercased() < $1.name.lowercased() }
+            byCategory[key]?.sort { $0.nameLower < $1.nameLower }
         }
     }
 

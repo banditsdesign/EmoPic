@@ -26,6 +26,22 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
     /// Usage score for ranking frequently used emoji.
     var usageScore: Int = 0
 
+    // MARK: - Precomputed search fields
+    //
+    // Search, relevance scoring, and colon-suggestion ranking run once per
+    // keystroke (the event tap) or per search query over ~1,900 entries and
+    // used to re-lowercase names several times each time. These forms are
+    // built once at construction instead. Excluded from coding — plain
+    // derivations of `name`/`aliases`, reconstructed on init.
+
+    var nameLower: String = ""
+    var aliasesLower: [String] = []
+    var haystackLower: String = ""
+
+    private enum CodingKeys: String, CodingKey {
+        case id, emoji, name, aliases, version, category, usageScore
+    }
+
     // MARK: - Convenience
 
     init(
@@ -42,6 +58,10 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
         self.version = version
         self.category = category
         self.id = id ?? emoji
+        let lowerAliases = aliases.map { $0.lowercased() }
+        self.nameLower = name.lowercased()
+        self.aliasesLower = lowerAliases
+        self.haystackLower = ([name] + lowerAliases).joined(separator: " ").lowercased()
     }
 
     // MARK: - Hashable, Equatable
@@ -62,18 +82,18 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
 
     func matchesQuery(_ query: String) -> Bool {
         let q = query.lowercased()
-        return name.lowercased().contains(q) || aliases.contains { $0.lowercased() == q }
+        return nameLower.contains(q) || aliasesLower.contains(q)
     }
 
     func relevanceScore(for query: String) -> Int {
         let q = query.lowercased()
-        if name.lowercased() == q { return 100 }
-        if aliases.contains(q) { return 100 }
-        if name.lowercased().contains(q) { return 50 }
-        if let idx = aliases.firstIndex(where: { $0.lowercased() == q }) {
+        if nameLower == q { return 100 }
+        if aliasesLower.contains(q) { return 100 }
+        if nameLower.contains(q) { return 50 }
+        if let idx = aliasesLower.firstIndex(where: { $0 == q }) {
             return 40 - idx * 5
         }
-        return searchableText.lowercased().contains(q) ? 20 : 0
+        return haystackLower.contains(q) ? 20 : 0
     }
 
     /// Check if this emoji supports skin tone modifiers.
@@ -85,7 +105,10 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
         return keywords.contains { name.contains($0) }
     }
 
-    /// Create a skin tone variant.
+    /// Create a skin tone variant. The variant keeps the BASE emoji's id so
+    /// usage recording stays keyed to one logical emoji — otherwise a
+    /// skin-toned insert would record an id (`👋🏿`) that never matches any
+    /// dataset entry and silently drop out of the recents list.
     func withSkinTone(_ tone: SkinTone) -> EmojiItem {
         let combined = emoji + tone.emoji
         return EmojiItem(
@@ -93,7 +116,8 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
             name: name,
             aliases: aliases,
             version: version,
-            category: category
+            category: category,
+            id: id
         )
     }
 }

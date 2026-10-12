@@ -111,6 +111,36 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertFalse(settings.isAppExcluded("com.apple.TextEdit"))
     }
 
+    /// v1.0 stored settings under an entitlement-less App-Group suite; the
+    /// standard domain is the store now. Migration must copy only missing
+    /// known keys, never overwrite existing ones, and be idempotent.
+    func testLegacySuiteMigrationCopiesMissingKeysOnly() throws {
+        let legacyName = "EmoPicTests-legacy-\(UUID().uuidString)"
+        let legacy = try XCTUnwrap(UserDefaults(suiteName: legacyName))
+        legacy.set("dark", forKey: "selectedSkinTone")
+        legacy.set(["😄", "👍"], forKey: "recentEmojiIDs")
+        legacy.set(true, forKey: "enableColonShortcuts")
+
+        let targetName = "EmoPicTests-target-\(UUID().uuidString)"
+        let target = try XCTUnwrap(UserDefaults(suiteName: targetName))
+        target.set("light", forKey: "selectedSkinTone") // pre-existing — must survive
+
+        AppSettings.migrateLegacyValues(into: target, legacySuiteName: legacyName)
+
+        XCTAssertEqual(target.string(forKey: "selectedSkinTone"), "light", "existing keys must not be overwritten")
+        XCTAssertEqual(target.array(forKey: "recentEmojiIDs") as? [String], ["😄", "👍"])
+        XCTAssertEqual(target.object(forKey: "enableColonShortcuts") as? Bool, true)
+        XCTAssertTrue(target.bool(forKey: "migratedFromLegacyGroupSuite"))
+
+        // Idempotent: post-migration legacy changes must not leak through.
+        legacy.set("medium", forKey: "selectedSkinTone")
+        AppSettings.migrateLegacyValues(into: target, legacySuiteName: legacyName)
+        XCTAssertEqual(target.string(forKey: "selectedSkinTone"), "light")
+
+        target.removePersistentDomain(forName: targetName)
+        legacy.removePersistentDomain(forName: legacyName)
+    }
+
     func testHotKeyRoundTrip() {
         let first = AppSettings(suiteName: suiteName)
         first.hotKeyCode = 40 // 'k'

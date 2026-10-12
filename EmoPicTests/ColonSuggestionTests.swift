@@ -65,9 +65,28 @@ final class ColonSuggestionTests: XCTestCase {
 
     // MARK: - Ranking against the real bundled dataset
 
-    override class func setUp() {
+    // `suggestions(forPrefix:)` boosts recents via `FrequentEmojiStore.shared`,
+    // which in the app-host test environment reads the developer's REAL
+    // defaults — so a `smi*`-prefixed emoji in the personal recents list
+    // reorders results and flaked `testPrefixMatchesContainKnownShortcodes`.
+    // Snapshot + clear recents for the ranking tests, restore afterwards.
+    private var savedRecents: [String]?
+
+    override func setUp() {
         super.setUp()
         EmojiDataManager.shared.loadEmojiData()
+        savedRecents = AppSettings.shared.recentEmojiIDs
+        AppSettings.shared.recentEmojiIDs = []
+        FrequentEmojiStore.shared.update()
+    }
+
+    override func tearDown() {
+        if let savedRecents {
+            AppSettings.shared.recentEmojiIDs = savedRecents
+            FrequentEmojiStore.shared.update()
+        }
+        savedRecents = nil
+        super.tearDown()
     }
 
     func testExactAliasRanksFirst() {

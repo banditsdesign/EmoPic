@@ -5,13 +5,20 @@ final class FrequentEmojiStore: ObservableObject {
     static let shared = FrequentEmojiStore()
     @Published private(set) var items: [EmojiItem] = []
 
+    /// id → rank (0 = most recent). Precomputed once per recents change
+    /// instead of being rebuilt inside EmojiDataManager's suggestion query
+    /// on every keystroke (docs/CODE_REVIEW_2026-10-12.md O1/O4).
+    private(set) var rankByID: [String: Int] = [:]
+
     func update() {
         let recent = AppSettings.shared.recentEmojiIDs
-        let all = EmojiDataManager.shared.emojiList
-        items = recent.compactMap { id -> EmojiItem? in
-            all.first { $0.id == id || $0.emoji == id }
-        }.prefix(12).map { $0 }
+        let byID = EmojiDataManager.shared.itemByID
+        items = recent.compactMap { byID[$0] }.prefix(12).map { $0 }
+        rankByID = Dictionary(uniqueKeysWithValues: items.enumerated().map { ($0.element.id, $0.offset) })
     }
+
+    /// Recency rank of an emoji id; `.max` when not recently used.
+    func rank(of id: String) -> Int { rankByID[id] ?? .max }
 
     func record(_ emoji: EmojiItem) {
         AppSettings.shared.recordUsage(emoji)

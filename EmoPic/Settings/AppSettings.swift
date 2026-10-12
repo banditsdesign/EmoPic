@@ -1,5 +1,7 @@
 // AppSettings.swift
-// Shared app settings persisted in UserDefaults.
+// Shared app settings persisted in the standard UserDefaults domain.
+// (v1.0 stored them under an App-Group suite name the app never had the
+// entitlement for — migrated once on launch, see `migrateLegacyValues`.)
 
 import Foundation
 import SwiftUI
@@ -11,11 +13,48 @@ final class AppSettings: ObservableObject {
 
     private let suite: UserDefaults
 
-    // Internal (not private) so the unit-test target can inject a volatile suite.
-    init(suiteName: String = AppSettings.suiteName) {
-        self.suite = UserDefaults(suiteName: suiteName) ?? UserDefaults.standard
+    /// v1.0's suite name, kept only as a migration source.
+    private static let legacySuiteName = "group.net.emopic.app"
+    private static let migrationDoneKey = "migratedFromLegacyGroupSuite"
+
+    // Internal (not private) so the unit-test target can inject a volatile
+    // suite. Injected suites skip migration — they are test fixtures, not
+    // the real store.
+    init(suiteName: String? = nil) {
+        if let suiteName {
+            suite = UserDefaults(suiteName: suiteName) ?? .standard
+        } else {
+            suite = .standard
+            Self.migrateLegacyValues(into: suite, legacySuiteName: Self.legacySuiteName)
+        }
         load()
     }
+
+    /// One-time copy of the settings v1.0 wrote into the (entitlement-less)
+    /// group suite. Only known app keys move, only into keys the standard
+    /// domain doesn't already have, and the legacy domain is left untouched —
+    /// idempotent and non-destructive. Internal for unit-test coverage.
+    static func migrateLegacyValues(into standard: UserDefaults, legacySuiteName: String) {
+        guard standard.bool(forKey: migrationDoneKey) == false else { return }
+        standard.set(true, forKey: migrationDoneKey)
+        guard let legacy = UserDefaults(suiteName: legacySuiteName),
+              let legacyValues = legacy.persistentDomain(forName: legacySuiteName),
+              !legacyValues.isEmpty else { return }
+        for key in legacyKeyNames {
+            if let value = legacyValues[key], standard.object(forKey: key) == nil {
+                standard.set(value, forKey: key)
+            }
+        }
+    }
+
+    /// Every key v1.0 could have written to the legacy suite, in one list so
+    /// migration and the `Keys` namespace can't drift apart.
+    static let legacyKeyNames: [String] = [
+        Keys.skinTone, Keys.recentIDs, Keys.enabledCategories, Keys.excludedApps,
+        Keys.enableColonShortcuts, Keys.showColonSuggestions, Keys.showFrequent,
+        Keys.hotKeyCode, Keys.hotKeyModifiers, Keys.hotKeyEnabled,
+        Keys.settingsTab, Keys.launchAtLogin,
+    ]
     // MARK: - Published Settings
 
     // NOTE: assignments inside load() fire didSet; the isLoading guard stops
@@ -24,58 +63,58 @@ final class AppSettings: ObservableObject {
     private var isLoading = false
 
     @Published var selectedSkinTone: SkinTone = .default {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.skinTone) } }
     }
 
     @Published var recentEmojiIDs: [String] = [] {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.recentIDs) } }
     }
 
     @Published var enabledCategories: [EmojiCategory.RawValue] = EmojiCategory.allCases.map(\.rawValue) {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.enabledCategories) } }
     }
 
     @Published var excludedApps: [String] = AppSettings.defaultExcludedApps {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.excludedApps) } }
     }
 
     @Published var enableColonShortcuts: Bool = true {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.enableColonShortcuts) } }
     }
 
     /// Show the Slack-style suggestion popup while typing :shortcod…
     @Published var showColonSuggestions: Bool = true {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.showColonSuggestions) } }
     }
 
     @Published var showFrequentInPicker: Bool = true {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.showFrequent) } }
     }
 
     /// Global picker hotkey (Carbon keyCode + modifier flags). See HotKeyOption.
     @Published var hotKeyCode: Int = HotKeyOption.defaultOption.keyCode {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.hotKeyCode) } }
     }
 
     @Published var hotKeyModifiers: Int = HotKeyOption.defaultOption.modifiers {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.hotKeyModifiers) } }
     }
 
     @Published var hotKeyEnabled: Bool = true {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.hotKeyEnabled) } }
     }
 
     /// Whether EmoPic registers itself as a login item (macOS 13+
     /// `SMAppService.mainApp`). The Settings toggle drives it; the
     /// persisted value mirrors the real service status.
     @Published var launchAtLogin: Bool = false {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.launchAtLogin) } }
     }
 
     /// Last-opened Settings pane rawValue; the window restores it and titles
     /// itself for its pane ("restore the last pane" — apple-hig settings.md).
     @Published var settingsTab: String = "Emoji Picker" {
-        didSet { if !isLoading { self.save() } }
+        didSet { if !isLoading { save(Keys.settingsTab) } }
     }
 
     // MARK: - Convenience
@@ -100,8 +139,6 @@ final class AppSettings: ObservableObject {
     }
 
     // MARK: - Defaults
-
-    private static let suiteName = "group.net.emopic.app"
 
     private static let defaultRecentIDs: [String] = []
     private static let defaultExcludedApps: [String] = [
@@ -133,24 +170,26 @@ final class AppSettings: ObservableObject {
 
     // MARK: - Persistence
 
-    private func save() {
-        if let tone = SkinTone(rawValue: selectedSkinTone.rawValue) {
-            suite.set(tone.rawValue, forKey: Keys.skinTone)
+    /// Persist exactly the key that changed — the previous save() rewrote
+    /// all twelve keys (plus a deprecated synchronize()) on every didSet.
+    /// No synchronize(): cfprefsd keeps same-process suite instances
+    /// coherent, and the suite round-trip tests guard exactly that.
+    private func save(_ key: String) {
+        switch key {
+        case Keys.skinTone: suite.set(selectedSkinTone.rawValue, forKey: key)
+        case Keys.recentIDs: suite.set(recentEmojiIDs, forKey: key)
+        case Keys.enabledCategories: suite.set(enabledCategories, forKey: key)
+        case Keys.excludedApps: suite.set(excludedApps, forKey: key)
+        case Keys.enableColonShortcuts: suite.set(enableColonShortcuts, forKey: key)
+        case Keys.showColonSuggestions: suite.set(showColonSuggestions, forKey: key)
+        case Keys.showFrequent: suite.set(showFrequentInPicker, forKey: key)
+        case Keys.hotKeyCode: suite.set(hotKeyCode, forKey: key)
+        case Keys.hotKeyModifiers: suite.set(hotKeyModifiers, forKey: key)
+        case Keys.hotKeyEnabled: suite.set(hotKeyEnabled, forKey: key)
+        case Keys.settingsTab: suite.set(settingsTab, forKey: key)
+        case Keys.launchAtLogin: suite.set(launchAtLogin, forKey: key)
+        default: break
         }
-        suite.set(recentEmojiIDs, forKey: Keys.recentIDs)
-        suite.set(enabledCategories, forKey: Keys.enabledCategories)
-        suite.set(excludedApps, forKey: Keys.excludedApps)
-        suite.set(enableColonShortcuts, forKey: Keys.enableColonShortcuts)
-        suite.set(showColonSuggestions, forKey: Keys.showColonSuggestions)
-        suite.set(showFrequentInPicker, forKey: Keys.showFrequent)
-        suite.set(hotKeyCode, forKey: Keys.hotKeyCode)
-        suite.set(hotKeyModifiers, forKey: Keys.hotKeyModifiers)
-        suite.set(hotKeyEnabled, forKey: Keys.hotKeyEnabled)
-        suite.set(settingsTab, forKey: Keys.settingsTab)
-        suite.set(launchAtLogin, forKey: Keys.launchAtLogin)
-        // Flush synchronously so writes are visible to other UserDefaults
-        // instances for the same suite (e.g. after relaunch, or in tests).
-        suite.synchronize()
     }
 
     private func load() {

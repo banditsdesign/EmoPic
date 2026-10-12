@@ -25,6 +25,11 @@ Type `:smi` in a text field **in any app** and a suggestion popup appears at the
 - `⌘,` - Open Settings
 - `⌘Q` - Quit EmoPic
 
+### Privacy
+- **No network access. No telemetry.** The emoji dataset is bundled inside the signed app bundle; EmoPic never phones home.
+- The colon-shortcut monitor uses a system-wide keyboard event tap, but keystrokes are examined **in memory only** — never logged, stored, or transmitted. At most the current `:shortcode` fragment (ASCII) is held, and it is discarded the moment you switch apps, press a modifier combo, or the pattern dies.
+- Password fields (secure input) and apps on your exclusion list are skipped, and a replacement only happens after EmoPic verifies the selected text matches exactly what you typed.
+
 Planned (see [docs/NEXT_STEPS_PLAN.md](docs/NEXT_STEPS_PLAN.md)):
 - `↑/↓` - Navigate picker results
 - `Enter/Tab` - Insert selected emoji
@@ -56,7 +61,7 @@ EmoPic/
 
 Requires Xcode 15+ and macOS 14+ (Sonoma).
 
-Prebuilt: grab `EmoPic-1.0.dmg` from the [latest GitHub Release](https://github.com/nicktangithub/EmoPic/releases). Open the disk image and drag EmoPic to Applications. Apple-**notarized**, Developer ID signed, hardened runtime — Gatekeeper accepts it directly. First launch asks for Accessibility access once (for text insertion).
+Prebuilt: grab `EmoPic-1.0.2.dmg` from the [latest GitHub Release](https://github.com/nicktangithub/EmoPic/releases). Open the disk image and drag EmoPic to Applications. Apple-**notarized**, Developer ID signed, hardened runtime — Gatekeeper accepts it directly. First launch asks for Accessibility access once (for text insertion).
 
 ## License
 
