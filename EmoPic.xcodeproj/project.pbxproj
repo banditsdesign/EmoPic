@@ -452,7 +452,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.emopic.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.9;
+				SWIFT_VERSION = 5.9;				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+
 			};
 			name = Release;
 		};
@@ -491,7 +493,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.emopic.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.9;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EmoPic.app/Contents/MacOS/EmoPic";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EmoPic.app/Contents/MacOS/EmoPic";				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+
 			};
 			name = Release;
 		};
