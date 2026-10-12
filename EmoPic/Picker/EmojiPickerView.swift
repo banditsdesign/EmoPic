@@ -102,36 +102,37 @@ struct EmojiPickerView: View {
     }
 
     // MARK: - Category view
+    //
+    // Was a horizontally scrolling strip of nine icon cards: too wide for
+    // the window (the cards had `maxWidth: .infinity` inside a horizontal
+    // ScrollView), and the selected card drew an opaque blue `Rectangle`
+    // *over* its icon and label, hiding the very thing it marked.
+    // Nine mutually exclusive choices in a compact popover window:
+    // apple-hig `tab-views.md` — "Avoid more than six tabs … for six or
+    // more, consider a pop-up menu of view options" — so a pop-up button
+    // (`pop-up-buttons.md`) it is: native `NSPopUpButton`, always shows
+    // the current category, fits any width.
     private var categoryView: some View {
         VStack(spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Picker("Category", selection: $selectedCategory) {
                     ForEach(EmojiCategory.allCases) { cat in
-                        VStack(spacing: 2) {
-                            Text(cat.icon).font(.system(size: 24))
-                            Text(cat.displayName)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color(NSColor.controlBackgroundColor))
-                        .cornerRadius(8)
-                        .onTapGesture {
-                            selectedCategory = cat
-                        }
-                        .overlay(
-                            Rectangle()
-                                .fill(selectedCategory == cat ? Color.blue : Color.clear)
-                                .cornerRadius(8),
-                            alignment: .top
-                        )
-                        .padding(.top, selectedCategory == cat ? 2 : 0)
+                        Text("\(cat.icon)  \(cat.displayName)").tag(cat)
                     }
                 }
-                .padding(.horizontal)
+                .labelsHidden()
+                .fixedSize()
+
+                Spacer()
+
+                Text("\(dataManager.emojis(in: selectedCategory).count) emoji")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+
+            Divider()
 
             ScrollView {
                 let emojis = dataManager.emojis(in: selectedCategory)

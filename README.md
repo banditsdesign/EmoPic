@@ -14,7 +14,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 ## How It Works
 
 ### Menu Bar Picker
-Click the **⌃ chevron** icon in your menu bar to open the picker window or its dropdown menu (Open Emoji Picker, Settings…, Quit). Search or browse categories to find the emoji you want.
+Click the **double-chevron** (`chevron.up.2`) icon in your menu bar to open the picker window or its dropdown menu (Open Emoji Picker, Settings…, Quit). Search or browse categories to find the emoji you want.
 
 ### Slack-style Shortcuts
 Type `:smi` in a text field **in any app** and a suggestion popup appears at the caret with matching emoji. `↑`/`↓` move the highlight, `Enter`/`Tab` or a click inserts the highlighted pick, `Esc` dismisses. You can still just keep typing the full `:smile:` and the closing `:` confirms the top match — the pattern is swapped for the emoji via the Accessibility API. The monitor is a system-wide event tap: characters always type through, and if the AX write fails your literal text stays untouched, nothing is ever swallowed. Grant Accessibility access when prompted (System Settings → Privacy & Security → Accessibility); the feature activates without relaunch. Excluded apps (set in Preferences) and secure password fields are skipped. The popup can be turned off in Settings → Colon Shortcuts to leave only the closing-`:` inline behaviour.
