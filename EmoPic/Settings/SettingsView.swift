@@ -1,79 +1,53 @@
 import SwiftUI
 
-/// EmoPic Settings — standard macOS preferences window.
+/// Panes of the Settings window, shown as toolbar items by
+/// `SettingsWindow`'s `NSTabViewController`.
 ///
-/// Apple's Settings guidance (apple-hig `settings.md`, macOS):
-/// "Choosing Settings from the App menu opens a window, typically a toolbar
-/// of related panes. … Use a visible, noncustomizable toolbar that marks
-/// the active button; title the window for its pane … restore the last
-/// pane."
-///
-/// This used to be an `HSplitView` with a `.sidebar` list: macOS sidebars
-/// "need substantial space" (`sidebars.md`) and looked out of place in a
-/// small settings window — and selecting the centered About pane appeared to
-/// shove everything sideways. The standard `TabView` on macOS renders
-/// exactly the expected pane-switcher toolbar (native hover/selection, no
-/// content shifting), with the window titled for its pane by
-/// `SettingsWindow`.
-struct SettingsView: View {
-    @ObservedObject private var settings = AppSettings.shared
-    @State private var selectedTab: SettingsTab
+/// A SwiftUI `TabView` was tried first, but on current macOS it renders as
+/// the new tab-bar style which, at this window width, collapsed all panes
+/// behind a `chevron.right.2` overflow menu. The HIG is explicit: "Avoid
+/// overflow" (`tab-bars.md`) and settings should be "a visible,
+/// noncustomizable toolbar that marks the active button" (`settings.md`).
+/// An AppKit `NSTabViewController` with `.toolbar` style is the exact
+/// mechanism Xcode/System Preferences use and cannot overflow.
+enum SettingsTab: String, CaseIterable, Identifiable {
+    case emojiPicker = "Emoji Picker"
+    case colonShortcuts = "Colon Shortcuts"
+    case excludedApps = "Excluded Apps"
+    case about = "About"
 
-    init() {
-        let saved = AppSettings.shared.settingsTab
-        _selectedTab = State(initialValue: SettingsTab(rawValue: saved) ?? .emojiPicker)
-    }
+    var id: String { rawValue }
 
-    enum SettingsTab: String, CaseIterable, Identifiable {
-        case emojiPicker = "Emoji Picker"
-        case colonShortcuts = "Colon Shortcuts"
-        case excludedApps = "Excluded Apps"
-        case about = "About"
-
-        var id: String { rawValue }
-
-        /// All icons verified to exist on the deployment target — two of
-        /// the previous names (`colon.textbox`, `list.bullet.square`) are
-        /// not real SF Symbols and rendered as fallback blobs.
-        var icon: String {
-            switch self {
-            case .emojiPicker: return "face.smiling"
-            case .colonShortcuts: return "keyboard"
-            case .excludedApps: return "minus.circle"
-            case .about: return "info.circle"
-            }
+    /// All icons verified to exist on the deployment target — two of the
+    /// earlier names (`colon.textbox`, `list.bullet.square`) are not real
+    /// SF Symbols and rendered as fallback blobs.
+    var icon: String {
+        switch self {
+        case .emojiPicker: return "face.smiling"
+        case .colonShortcuts: return "keyboard"
+        case .excludedApps: return "minus.circle"
+        case .about: return "info.circle"
         }
     }
 
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            EmojiPickerSettingsView()
-                .tabItem { Label(SettingsTab.emojiPicker.rawValue, systemImage: SettingsTab.emojiPicker.icon) }
-                .tag(SettingsTab.emojiPicker)
+    /// Fixed pane size — every pane uses it so switching never resizes or
+    /// shifts anything ("panes fit their content", settings.md).
+    static let paneSize = NSSize(width: 480, height: 360)
 
-            ColonShortcutsSettingsView()
-                .tabItem { Label(SettingsTab.colonShortcuts.rawValue, systemImage: SettingsTab.colonShortcuts.icon) }
-                .tag(SettingsTab.colonShortcuts)
-
-            ExcludedAppsView()
-                .tabItem { Label(SettingsTab.excludedApps.rawValue, systemImage: SettingsTab.excludedApps.icon) }
-                .tag(SettingsTab.excludedApps)
-
-            AboutView()
-                .tabItem { Label(SettingsTab.about.rawValue, systemImage: SettingsTab.about.icon) }
-                .tag(SettingsTab.about)
-        }
-        .frame(width: 480, height: 400)
-        .onChange(of: selectedTab) { tab in
-            // Restore-the-last-pane; also drives the window title.
-            settings.settingsTab = tab.rawValue
+    @ViewBuilder
+    func paneView() -> some View {
+        switch self {
+        case .emojiPicker: EmojiPickerSettingsView()
+        case .colonShortcuts: ColonShortcutsSettingsView()
+        case .excludedApps: ExcludedAppsView()
+        case .about: AboutView()
         }
     }
 }
 
 // MARK: - Emoji Picker Settings
 
-private struct EmojiPickerSettingsView: View {
+struct EmojiPickerSettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
     @State private var hotKeyStatus: String = GlobalHotKey.shared.statusDescription
 
@@ -166,7 +140,7 @@ private struct EmojiPickerSettingsView: View {
 
 // MARK: - Colon Shortcuts Settings
 
-private struct ColonShortcutsSettingsView: View {
+struct ColonShortcutsSettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
 
     var body: some View {

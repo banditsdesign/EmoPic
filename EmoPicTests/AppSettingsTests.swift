@@ -3,6 +3,7 @@
 
 import XCTest
 import Carbon.HIToolbox
+import AppKit
 @testable import EmoPic
 
 final class AppSettingsTests: XCTestCase {
@@ -36,6 +37,30 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertTrue(settings.enableColonShortcuts)
         XCTAssertTrue(settings.showFrequentInPicker)
         XCTAssertTrue(settings.hotKeyEnabled)
+        XCTAssertEqual(settings.settingsTab, "Emoji Picker")
+    }
+
+    /// The Settings window restores the last-opened pane (apple-hig
+    /// settings.md), so the value must survive instances and launches.
+    func testSettingsTabRoundTrip() {
+        let first = AppSettings(suiteName: suiteName)
+        first.settingsTab = "Colon Shortcuts"
+        let second = AppSettings(suiteName: suiteName)
+        XCTAssertEqual(second.settingsTab, "Colon Shortcuts")
+    }
+
+    /// Every tab icon must resolve to a real SF Symbol — `colon.textbox`
+    /// and `list.bullet.square` once rendered as fallback blobs because
+    /// they don't exist. Also asserts pane titles are unique (they double
+    /// as toolbar item identifiers and window titles).
+    func testSettingsTabIconsResolveAndTitlesAreUnique() {
+        XCTAssertEqual(Set(SettingsTab.allCases.map(\.rawValue)).count, SettingsTab.allCases.count)
+        for tab in SettingsTab.allCases {
+            XCTAssertNotNil(
+                NSImage(systemSymbolName: tab.icon, accessibilityDescription: tab.rawValue),
+                "SF Symbol \(tab.icon) does not exist on this OS"
+            )
+        }
     }
 
     func testRoundTripAcrossInstances() {

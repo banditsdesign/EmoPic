@@ -1,47 +1,92 @@
+import AppKit
 import SwiftUI
-import Combine
 
 /// Standard macOS settings window host.
 ///
-/// Per apple-hig `settings.md` (macOS): settings open as a window with
-/// "a toolbar of related panes"; "dim minimize/maximize (… panes fit their
-/// content)"; "title the window for its pane … restore the last pane".
-/// The panes themselves live in `SettingsView` (standard `TabView`, which
-/// renders the native toolbar pane-switcher).
+/// Panes are switched by an AppKit `NSTabViewController` with `.toolbar`
+/// style — the same mechanism Xcode and System Preferences use: a row of
+/// labeled toolbar buttons across the top, marking the active pane, that
+/// can never overflow behind a chevron menu. This is what the HIG asks for:
+/// "Choosing Settings … opens a window, typically a toolbar of related
+/// panes. Use a visible, noncustomizable toolbar that marks the active
+/// button; title the window for its pane … restore the last pane"
+/// (apple-hig `settings.md`), reinforced by "Avoid overflow"
+/// (`tab-bars.md`).
+///
+/// The earlier SwiftUI `TabView` was wrong for this window width: macOS
+/// collapsed the panes into a `chevron.right.2` overflow menu. The panes
+/// themselves remain SwiftUI, hosted per tab.
 final class SettingsWindow {
     static let shared = SettingsWindow()
 
     private var window: NSWindow?
-    private var cancellables = Set<AnyCancellable>()
+    private var tabController: SettingsTabViewController?
 
     func show() {
-        if window == nil {
-            let w = NSWindow(
-                contentRect: CGRect(x: 0, y: 0, width: 480, height: 400),
-                // .titled + .closable only: minimize/zoom stay dimmed
-                // because each pane is fixed-size and fits its content.
-                styleMask: [.titled, .closable],
-                backing: .buffered, defer: false
-            )
-            w.isReleasedWhenClosed = false
-            w.center() // once; later opens remember the user's position
-
-            // Title follows the active pane; @Published replays its current
-            // value, so the restored last pane titles the window at once.
-            AppSettings.shared.$settingsTab
-                .receive(on: RunLoop.main)
-                .sink { [weak w] tab in w?.title = tab }
-                .store(in: &cancellables)
-
-            window = w
-        }
-
-        window?.contentView = NSHostingView(rootView: SettingsView())
+        if window == nil { build() }
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
     }
 
     func close() {
         window?.close()
+    }
+
+    // MARK: - Construction
+
+    private func build() {
+        let controller = SettingsTabViewController()
+        controller.tabStyle = .toolbar // top toolbar of pane buttons
+
+        for tab in SettingsTab.allCases {
+            let item = NSTabViewItem(identifier: tab.rawValue)
+            item.label = tab.rawValue
+            item.image = NSImage(systemSymbolName: tab.icon, accessibilityDescription: tab.rawValue)
+
+            let hosting = NSHostingController(rootView: tab.paneView())
+            // Identical fixed size everywhere: switching panes never
+            // resizes or shifts the window ("panes fit their content").
+            hosting.preferredContentSize = SettingsTab.paneSize
+            item.viewController = hosting
+
+            controller.addTabViewItem(item)
+        }
+
+        let window = NSWindow(contentViewController: controller)
+        // .titled + .closable only: minimize/zoom stay dimmed — every pane
+        // is the same fixed size (settings.md).
+        window.styleMask = [.titled, .closable]
+        window.isReleasedWhenClosed = false
+        window.toolbarStyle = .preference // centered icon-over-label panes
+        window.tabbingMode = .disallowed
+        window.setContentSize(SettingsTab.paneSize)
+
+        // Restore the last pane.
+        let last = SettingsTab.allCases.firstIndex {
+            $0.rawValue == AppSettings.shared.settingsTab
+        } ?? 0
+        controller.selectedTabViewItemIndex = last
+        window.title = SettingsTab.allCases[last].rawValue
+        controller.onTabChange = { [weak window] paneTitle in
+            // "title the window for its pane" — kept live on every switch.
+            window?.title = paneTitle
+            AppSettings.shared.settingsTab = paneTitle
+        }
+
+        self.window = window
+        self.tabController = controller
+        window.center()
+    }
+}
+
+/// Subclass (rather than an external `NSTabViewDelegate`) so the controller
+/// keeps its own toolbar bookkeeping — we only observe selection changes.
+private final class SettingsTabViewController: NSTabViewController {
+    var onTabChange: ((String) -> Void)?
+
+    override func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
+        super.tabView(tabView, didSelect: tabViewItem)
+        guard let id = tabViewItem?.identifier as? String else { return }
+        onTabChange?(id)
     }
 }
