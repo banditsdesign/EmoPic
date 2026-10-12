@@ -13,6 +13,29 @@ struct EmojiPickerView: View {
     @State private var skinToneEmoji: EmojiItem?
     @State private var skinToneSourceID: String?
     @State private var showSkinTonePicker = false
+    /// id of the search row currently showing the tone chooser — keyed per
+    /// row so all rows don't present the popover at once.
+    @State private var searchSkinToneID: String?
+
+    /// Single pick path for every tab (grid cells and search rows), so a
+    /// click behaves identically everywhere ("Keep visual and interaction
+    /// behavior consistent" — apple-hig design-principles.md Familiarity).
+    /// Tone-capable emoji open the chooser anchored to the source; `fromSearch`
+    /// keys the popover to the clicked list row instead of the grid cell.
+    private func handlePick(_ emoji: EmojiItem, fromSearch: Bool = false) {
+        if emoji.supportsSkinTone {
+            if fromSearch {
+                searchSkinToneID = emoji.id
+            } else {
+                skinToneSourceID = emoji.id
+                skinToneEmoji = emoji
+                showSkinTonePicker = true
+            }
+        } else {
+            onSelect(emoji)
+            FrequentEmojiStore.shared.record(emoji)
+        }
+    }
 
     enum SearchMode {
         case search, category, frequent
@@ -122,25 +145,48 @@ struct EmojiPickerView: View {
     }
 
     // MARK: - Search results view
+    //
+    // Rows used to be plain content in a `List(selection:)` — a click only
+    // updated `selectedEmoji` and nothing acted on it, so nothing was ever
+    // inserted (the grid tabs worked because their cells are Buttons).
+    // Each row is now a full-width Button on the same pick path.
     private var searchResultsView: some View {
         let results = query.isEmpty
             ? dataManager.emojis(in: .smileys)
             : dataManager.search(query, first: 50)
 
         return List(results, id: \.id, selection: $selectedEmoji) { emoji in
-            HStack(spacing: 8) {
-                Text(emoji.emoji)
-                    .font(.system(size: 28))
-                VStack(alignment: .leading) {
-                    Text(emoji.name)
-                        .font(.subheadline)
-                    Text(emoji.aliases.prefix(3).joined(separator: " · "))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+            Button {
+                selectedEmoji = emoji
+                handlePick(emoji, fromSearch: true)
+            } label: {
+                HStack(spacing: 8) {
+                    Text(emoji.emoji)
+                        .font(.system(size: 28))
+                    VStack(alignment: .leading) {
+                        Text(emoji.name)
+                            .font(.subheadline)
+                        Text(emoji.aliases.prefix(3).joined(separator: " · "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
                 }
+                .contentShape(Rectangle()) // whole row is clickable, not just glyphs
+                .padding(.vertical, 2)
             }
-            .padding(.vertical, 2)
+            .buttonStyle(.plain)
+            .popover(
+                isPresented: Binding(
+                    get: { searchSkinToneID == emoji.id },
+                    set: { if !$0 { searchSkinToneID = nil } }
+                ),
+                attachmentAnchor: .point(.trailing),
+                arrowEdge: .trailing
+            ) {
+                skinToneChooser { searchSkinToneID = nil }
+            }
         }
         .listStyle(.plain)
         .frame(minWidth: 0, maxWidth: .infinity)
@@ -150,14 +196,7 @@ struct EmojiPickerView: View {
     @ViewBuilder
     private func emojiCell(_ emoji: EmojiItem) -> some View {
         Button {
-            if emoji.supportsSkinTone {
-                skinToneSourceID = emoji.id
-                skinToneEmoji = emoji
-                showSkinTonePicker = true
-            } else {
-                onSelect(emoji)
-                FrequentEmojiStore.shared.record(emoji)
-            }
+            handlePick(emoji)
         } label: {
             HStack(spacing: 0) {
                 Text(emoji.emoji)
@@ -187,7 +226,11 @@ struct EmojiPickerView: View {
             attachmentAnchor: .point(.top),
             arrowEdge: .bottom
         ) {
-            skinTonePopoverView
+            skinToneChooser {
+                skinToneEmoji = nil
+                skinToneSourceID = nil
+                showSkinTonePicker = false
+            }
         }
         .onChange(of: skinToneEmoji) {
             if let emoji = skinToneEmoji {
@@ -196,8 +239,8 @@ struct EmojiPickerView: View {
         }
     }
 
-    // MARK: - Skin tone popover
-    private var skinTonePopoverView: some View {
+    // MARK: - Skin tone chooser (shared by grid cells and search rows)
+    private func skinToneChooser(clear: @escaping () -> Void) -> some View {
         let settings = AppSettings.shared
         return VStack(spacing: 8) {
             Text("Select skin tone")
@@ -209,9 +252,7 @@ struct EmojiPickerView: View {
                 ForEach(SkinTone.allCases) { tone in
                     Button {
                         settings.selectedSkinTone = tone
-                        skinToneEmoji = nil
-                        skinToneSourceID = nil
-                        showSkinTonePicker = false
+                        clear()
                     } label: {
                         VStack(spacing: 2) {
                             Text(tone.emoji).font(.system(size: 22))
