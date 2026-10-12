@@ -71,12 +71,18 @@ final class GlobalHotKey {
         let settings = AppSettings.shared
         guard settings.hotKeyEnabled else { return false }
 
+        // Resolve the persisted pair through the preset table: validates the
+        // values (a corrupt or hand-edited plist must not trap the UInt32
+        // conversion here and crash the app at launch) and falls back to the
+        // default combo for anything unknown.
+        let option = settings.hotKeyOption
+
         installEventHandlerIfNeeded()
 
         var ref: EventHotKeyRef?
         let id = EventHotKeyID(signature: Self.signature, id: UInt32(Self.hotKeyID))
         lastStatus = RegisterEventHotKey(
-            UInt32(settings.hotKeyCode), UInt32(settings.hotKeyModifiers),
+            UInt32(option.keyCode), UInt32(option.modifiers),
             id, GetApplicationEventTarget(), 0, &ref
         )
         hotKeyRef = ref

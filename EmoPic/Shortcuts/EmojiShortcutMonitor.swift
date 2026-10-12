@@ -32,6 +32,13 @@ final class EmojiShortcutMonitor: ObservableObject {
     private var tap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
 
+    /// Last time the tap was re-armed after a system disable. Throttled so a
+    /// hung callback (slow AX target) can't create a disable→re-enable storm;
+    /// the re-arm itself is always scheduled, so the tap is guaranteed to
+    /// come back even if no further disable events arrive.
+    private var lastTapReenableAt = Date.distantPast
+    private static let tapReenableInterval: TimeInterval = 0.25
+
     private var buffer = ColonBuffer()
 
     // Cached frontmost-app state (updated on activation notifications only —
@@ -181,12 +188,27 @@ final class EmojiShortcutMonitor: ObservableObject {
         ColonSuggestionPanel.shared.hide()
     }
 
+    /// Re-arm the system-disabled tap, but no more often than
+    /// `tapReenableInterval`. Immediate for a one-off disable (secure input
+    /// ending, single slow event); deferred for rapid repeats so a hung
+    /// callback can't spin the tap. Skips if the tap was torn down meanwhile.
+    private func scheduleTapReenable() {
+        guard let tap else { return }
+        let now = Date()
+        let delay = max(0, Self.tapReenableInterval - now.timeIntervalSince(lastTapReenableAt))
+        lastTapReenableAt = now.addingTimeInterval(delay) // reserve the slot
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self, self.tap === tap else { return }
+            CGEvent.tapEnable(tap: tap, enable: true)
+        }
+    }
+
     // MARK: - Tap callback bridge (main thread)
 
     fileprivate func handle(_ type: CGEventType, _ event: CGEvent) -> Unmanaged<CGEvent>? {
         // The system disables the tap after slow processing or secure input.
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
+            scheduleTapReenable()
             flush()
             return nil
         }
@@ -309,7 +331,8 @@ final class EmojiShortcutMonitor: ObservableObject {
         let finalEmoji = Self.applySkinTone(to: emoji)
         let replacement = finalEmoji.emoji + (trailingSpace ? " " : "")
         let success = AXTextInserter.replaceBeforeCaret(
-            count: replaceCount, with: replacement, at: frontmostPID
+            count: replaceCount, with: replacement, at: frontmostPID,
+            expected: ":" + name
         )
 
         flush()
@@ -334,7 +357,8 @@ final class EmojiShortcutMonitor: ObservableObject {
         let typedCount = buffer.name.utf16.count + 1 // ":name" before the caret
 
         if AXTextInserter.replaceBeforeCaret(
-            count: typedCount, with: replacement, at: frontmostPID
+            count: typedCount, with: replacement, at: frontmostPID,
+            expected: ":" + buffer.name
         ) {
             FrequentEmojiStore.shared.record(finalEmoji)
             return nil
@@ -351,7 +375,8 @@ final class EmojiShortcutMonitor: ObservableObject {
         let finalEmoji = Self.applySkinTone(to: suggestion.emoji)
         let typedCount = buffer.name.utf16.count + 1
         if AXTextInserter.replaceBeforeCaret(
-            count: typedCount, with: finalEmoji.emoji, at: frontmostPID
+            count: typedCount, with: finalEmoji.emoji, at: frontmostPID,
+            expected: ":" + buffer.name
         ) {
             FrequentEmojiStore.shared.record(finalEmoji)
         }

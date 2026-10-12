@@ -71,6 +71,12 @@ final class EmojiPickerWindow {
     }
 
     private func insert(_ emoji: EmojiItem) {
+        // Never target our own process: if Settings (or the picker itself)
+        // was frontmost when the hotkey fired, `previousApp` is EmoPic. The
+        // AX write would hit our own UI and, failing that, the clipboard
+        // fallback would ⌘V-paste into whichever app won the focus race
+        // after close. Drop the pick instead of guessing a destination.
+        guard previousApp?.bundleIdentifier != Bundle.main.bundleIdentifier else { return }
         AccessibilityInjector.insert(emoji, into: previousApp?.processIdentifier)
     }
 }

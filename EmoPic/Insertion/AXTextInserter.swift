@@ -13,11 +13,26 @@ enum AXTextInserter {
 
     /// AX roles we consider writable text targets.
     /// ("AXSearchField" is what WebKit/Chromium expose; not in public headers.)
+    /// NOTE: this is an ALLOWLIST — never add password-ish roles here.
     private static let writableRoles: Set<String> = [
         kAXTextAreaRole as String,
         kAXTextFieldRole as String,
         kAXComboBoxRole as String,
         "AXSearchField",
+    ]
+
+    /// Roles we refuse even if a future editable-roles edit would admit them.
+    /// Password/secure fields expose one of these across AppKit/WebKit/
+    /// Chromium. This explicit deny backs the "secure password fields are
+    /// skipped" promise together with two other independent layers:
+    ///   1. While secure input is active macOS does not deliver key events
+    ///      to our event tap, so nothing buffers at all.
+    ///   2. replaceBeforeCaret verifies it can READ the selected text before
+    ///      writing — secure fields refuse to expose their text, so the
+    ///      verify fails and no write happens.
+    private static let forbiddenRoles: Set<String> = [
+        "AXSecureField",
+        "AXPasswordField",
     ]
 
     /// Messaging timeout so a hung app can't freeze the picker.
@@ -31,6 +46,17 @@ enum AXTextInserter {
     @discardableResult
     static func insert(_ text: String, at pid: pid_t) -> Bool {
         guard !text.isEmpty, let element = focusedTextElement(for: pid) else { return false }
+        // The write below REPLACES the current selection. If the user has
+        // something highlighted in the target app, collapse the selection to
+        // its end first so the emoji is inserted at the caret instead of
+        // silently destroying their selection. If the collapse fails we
+        // proceed anyway — same behavior as before, never worse.
+        if let selection = selectedRange(of: element), selection.length > 0 {
+            _ = setSelectedRange(
+                NSRange(location: selection.location + selection.length, length: 0),
+                on: element
+            )
+        }
         let err = AXUIElementSetAttributeValue(
             element, kAXSelectedTextAttribute as CFString, text as CFString
         )
@@ -47,26 +73,33 @@ enum AXTextInserter {
     }
 
     /// Replace `count` UTF-16 units immediately before the caret with `text`.
-    /// The selection is verified before the write; the original caret
-    /// position is restored on any failure. Used by colon shortcuts to
-    /// swap a typed `:name:` pattern for the emoji after the fact.
+    /// `expected` is the exact text the caller believes sits in that range
+    /// (e.g. `":smile"`) — the selection is verified against its CONTENT
+    /// before the write, so a caret that moved between keystrokes (or any
+    /// race with the target app) fails closed and the caret is restored.
+    /// Used by colon shortcuts to swap a typed `:name:` pattern for the
+    /// emoji after the fact.
     @discardableResult
-    static func replaceBeforeCaret(count: Int, with text: String, at pid: pid_t) -> Bool {
-        guard count > 0, !text.isEmpty, let element = focusedTextElement(for: pid) else { return false }
+    static func replaceBeforeCaret(count: Int, with text: String, at pid: pid_t, expected: String) -> Bool {
+        guard count > 0, !text.isEmpty, !expected.isEmpty,
+              let element = focusedTextElement(for: pid) else { return false }
         guard let caret = selectedRange(of: element) else { return false }
 
         let target = NSRange(location: caret.location - count, length: count)
         guard target.location >= 0 else { return false }
         guard setSelectedRange(target, on: element) else { return false }
 
-        // Verify the selection captured exactly `count` UTF-16 units before writing.
+        // Verify the selection captured exactly the expected typed pattern
+        // before writing. Content comparison (not just length): replacing a
+        // different region of the same length would silently destroy user
+        // text, so any mismatch aborts and restores the original caret.
         var selectedValue: CFTypeRef?
         let verifyErr = AXUIElementCopyAttributeValue(
             element, kAXSelectedTextAttribute as CFString, &selectedValue
         )
         guard verifyErr == .success,
               let selected = selectedValue as? String,
-              selected.utf16.count == count else {
+              selected == expected else {
             _ = setSelectedRange(caret, on: element)
             return false
         }
@@ -127,7 +160,14 @@ enum AXTextInserter {
         guard CFGetTypeID(focused) == AXUIElementGetTypeID() else { return nil }
         let element = focused as! AXUIElement
 
-        guard let role = role(of: element), writableRoles.contains(role) else { return nil }
+        // The messaging timeout is per-element: set it on the focused child
+        // too, not just the app element, or a hung app can stall callers
+        // (including the event tap callback) for the default 6 s per call.
+        AXUIElementSetMessagingTimeout(element, messagingTimeout)
+
+        guard let role = role(of: element),
+              writableRoles.contains(role),
+              !forbiddenRoles.contains(role) else { return nil }
         return element
     }
 

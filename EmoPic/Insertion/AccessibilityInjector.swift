@@ -14,7 +14,9 @@ struct AccessibilityInjector {
 
     /// Insert an emoji into the app running as `pid` (captured before the
     /// picker stole focus). Falls back to clipboard paste when the target
-    /// exposes no writable AX text element.
+    /// exposes no writable AX text element. The fallback verifies the
+    /// intended app actually holds focus before firing the synthetic ⌘V
+    /// (see `pasteboardInsert`).
     static func insert(_ emoji: EmojiItem, into pid: pid_t?) {
         guard isTrusted else {
             showAccessibilityPrompt()
@@ -25,7 +27,7 @@ struct AccessibilityInjector {
             return
         }
 
-        pasteboardInsert(emoji.emoji)
+        pasteboardInsert(emoji.emoji, intendedPID: pid)
     }
 
     /// Convenience for callers without a captured target (menu-bar quick
@@ -43,7 +45,13 @@ struct AccessibilityInjector {
 
     // MARK: - Clipboard fallback (with save/restore)
 
-    private static func pasteboardInsert(_ text: String) {
+    /// Paste `text` via a synthetic ⌘V. The paste fires ONLY while the
+    /// intended app holds focus — without that check, a slow focus restore
+    /// (or the user ⌘-tabbing during the 0.1 s window) would paste the emoji
+    /// into whatever app won the race. On a focus mismatch the paste is
+    /// retried once after a beat; the user's clipboard is restored 0.4 s
+    /// after whichever paste attempt ran, unchanged from before.
+    private static func pasteboardInsert(_ text: String, intendedPID: pid_t?) {
         let pasteboard = NSPasteboard.general
 
         // Snapshot the user's clipboard so we can put it back afterwards.
@@ -52,16 +60,34 @@ struct AccessibilityInjector {
         pasteboard.setString(text, forType: .string)
         let ourChangeCount = pasteboard.changeCount
 
-        // The picker window closes right after this call, returning focus to the
-        // previously active app. Paste once focus has settled.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            pasteWithCommandV()
+        // True only when the intended target (or, with no captured target,
+        // any app but EmoPic) is frontmost right now.
+        func focusMatches() -> Bool {
+            guard let frontmost = NSWorkspace.shared.frontmostApplication,
+                  frontmost.bundleIdentifier != Bundle.main.bundleIdentifier else { return false }
+            guard let intendedPID else { return true }
+            return frontmost.processIdentifier == intendedPID
+        }
 
-            // Restore the original clipboard shortly after the paste — but only
-            // if the user hasn't copied something newer in the meantime.
+        func restoreIfUnchanged() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 guard pasteboard.changeCount == ourChangeCount else { return }
                 snapshot.restore(to: pasteboard)
+            }
+        }
+
+        // The picker window closes right after this call, returning focus to
+        // the previously active app. Paste once focus has settled; if it
+        // hasn't after the first beat, give a slow app one more chance.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if focusMatches() {
+                pasteWithCommandV()
+                restoreIfUnchanged()
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    if focusMatches() { pasteWithCommandV() }
+                    restoreIfUnchanged()
+                }
             }
         }
     }
