@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		739CA301307C9CCF002EAF52 /* EmoPic.icon in Resources */ = {isa = PBXBuildFile; fileRef = 739CA300307C9CCF002EAF52 /* EmoPic.icon */; };
 		A10001 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10010 /* App.swift */; };
 		A10002 /* EmoPic-App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10011 /* EmoPic-App.swift */; };
 		A10003 /* EmojiCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10012 /* EmojiCategory.swift */; };
@@ -48,6 +49,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		739CA300307C9CCF002EAF52 /* EmoPic.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = EmoPic.icon; sourceTree = "<group>"; };
 		A000102 /* SettingsWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		A000103 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A000FF /* EmoPic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmoPic.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -106,6 +108,7 @@
 				A000G7 /* Utilities */,
 				A000RG /* Resources */,
 				A1001F /* Info.plist */,
+				739CA300307C9CCF002EAF52 /* EmoPic.icon */,
 			);
 			path = EmoPic;
 			sourceTree = "<group>";
@@ -313,6 +316,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10022 /* emoji-data.json in Resources */,
+				739CA301307C9CCF002EAF52 /* EmoPic.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,7 +401,7 @@
 		A000B2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = EmoPic;
 				CODE_SIGN_IDENTITY = "Developer ID Application: NICHOLAS TAN (MLT7DK5FRB)";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -426,7 +430,7 @@
 		A000B3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = EmoPic;
 				CODE_SIGN_IDENTITY = "Developer ID Application: NICHOLAS TAN (MLT7DK5FRB)";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;

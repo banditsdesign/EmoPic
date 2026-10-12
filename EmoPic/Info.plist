@@ -7,9 +7,9 @@
 	<key>CFBundleExecutable</key>
 	<string>EmoPic</string>
 	<key>CFBundleIconFile</key>
-	<string>AppIcon</string>
+	<string>EmoPic</string>
 	<key>CFBundleIconName</key>
-	<string>AppIcon</string>
+	<string>EmoPic</string>
 	<key>CFBundleIdentifier</key>
 	<string>net.emopic.app</string>
 	<key>CFBundleInfoDictionaryVersion</key>
