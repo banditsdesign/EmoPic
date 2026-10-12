@@ -65,6 +65,13 @@ final class AppSettings: ObservableObject {
         didSet { if !isLoading { self.save() } }
     }
 
+    /// Whether EmoPic registers itself as a login item (macOS 13+
+    /// `SMAppService.mainApp`). The Settings toggle drives it; the
+    /// persisted value mirrors the real service status.
+    @Published var launchAtLogin: Bool = false {
+        didSet { if !isLoading { self.save() } }
+    }
+
     /// Last-opened Settings pane rawValue; the window restores it and titles
     /// itself for its pane ("restore the last pane" — apple-hig settings.md).
     @Published var settingsTab: String = "Emoji Picker" {
@@ -121,6 +128,7 @@ final class AppSettings: ObservableObject {
         static let hotKeyModifiers = "hotKeyModifiers"
         static let hotKeyEnabled = "hotKeyEnabled"
         static let settingsTab = "settingsTab"
+        static let launchAtLogin = "launchAtLogin"
     }
 
     // MARK: - Persistence
@@ -139,6 +147,7 @@ final class AppSettings: ObservableObject {
         suite.set(hotKeyModifiers, forKey: Keys.hotKeyModifiers)
         suite.set(hotKeyEnabled, forKey: Keys.hotKeyEnabled)
         suite.set(settingsTab, forKey: Keys.settingsTab)
+        suite.set(launchAtLogin, forKey: Keys.launchAtLogin)
         // Flush synchronously so writes are visible to other UserDefaults
         // instances for the same suite (e.g. after relaunch, or in tests).
         suite.synchronize()
@@ -158,5 +167,6 @@ final class AppSettings: ObservableObject {
         hotKeyModifiers = suite.object(forKey: Keys.hotKeyModifiers) as? Int ?? HotKeyOption.defaultOption.modifiers
         hotKeyEnabled = suite.object(forKey: Keys.hotKeyEnabled) as? Bool ?? true
         settingsTab = suite.string(forKey: Keys.settingsTab) ?? "Emoji Picker"
+        launchAtLogin = suite.object(forKey: Keys.launchAtLogin) as? Bool ?? false
     }
 }

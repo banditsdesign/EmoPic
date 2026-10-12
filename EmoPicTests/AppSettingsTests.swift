@@ -42,6 +42,16 @@ final class AppSettingsTests: XCTestCase {
 
     /// The Settings window restores the last-opened pane (apple-hig
     /// settings.md), so the value must survive instances and launches.
+    func testLaunchAtLoginDefaultsFalseAndRoundTrips() {
+        let suiteName = "EmoPicTests.launchAtLogin"
+        UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
+        let s1 = AppSettings(suiteName: suiteName)
+        XCTAssertFalse(s1.launchAtLogin, "login item should default off")
+        s1.launchAtLogin = true
+        XCTAssertTrue(AppSettings(suiteName: suiteName).launchAtLogin)
+        UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
+    }
+
     func testSettingsTabRoundTrip() {
         let first = AppSettings(suiteName: suiteName)
         first.settingsTab = "Colon Shortcuts"

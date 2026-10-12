@@ -9,6 +9,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 - **Skin Tone Support**: Pick your preferred skin tone for hand, person, and other emoji
 - **Light & Dark Mode**: Automatically follows your system appearance
 - **Frequently Used**: Your most-used emoji rise to the top
+- **Launch at Login**: Optional auto-start when you sign in (toggle in Settings)
 - **Categories & Search**: Browse by category or search by name/alias
 
 ## How It Works

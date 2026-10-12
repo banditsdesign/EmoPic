@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 /// Panes of the Settings window, shown as toolbar items by
 /// `SettingsWindow`'s `NSTabViewController`.
@@ -50,9 +51,24 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 struct EmojiPickerSettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
     @State private var hotKeyStatus: String = GlobalHotKey.shared.statusDescription
+    @State private var loginItemError: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            SectionLabel("Startup")
+            Toggle("Launch at login", isOn: launchAtLoginBinding)
+                .toggleStyle(.switch)
+            Text("Start EmoPic automatically when you sign in. You can also manage it in System Settings → General → Login Items.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if let loginItemError {
+                Text(loginItemError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+
+            Divider()
+
             SectionLabel("Default Skin Tone")
             HStack(spacing: 8) {
                 ForEach(SkinTone.allCases) { tone in
@@ -121,6 +137,29 @@ struct EmojiPickerSettingsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(20)
+    }
+
+    /// Toggle backed by `SMAppService.mainApp` (macOS 13+). Only updates
+    /// the persisted mirror after the system call succeeds, so the switch
+    /// never claims a state the system doesn't have; failures surface in
+    /// red beside the toggle and leave it on the previous value.
+    private var launchAtLoginBinding: Binding<Bool> {
+        Binding(
+            get: { settings.launchAtLogin },
+            set: { newValue in
+                do {
+                    if newValue {
+                        try SMAppService.mainApp.register()
+                    } else if SMAppService.mainApp.status != .notRegistered {
+                        try SMAppService.mainApp.unregister()
+                    }
+                    settings.launchAtLogin = newValue
+                    loginItemError = nil
+                } catch {
+                    loginItemError = "Couldn’t change the login item: \(error.localizedDescription)"
+                }
+            }
+        )
     }
 
     /// Binding mapping the Picker's preset id onto the persisted keyCode/modifiers.
