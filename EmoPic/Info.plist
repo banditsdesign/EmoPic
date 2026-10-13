@@ -36,7 +36,7 @@
 	     user opts in: SUEnableAutomaticChecks is false here *and* defaults to
 	     false in AppSettings, so a fresh install makes no connection at all. -->
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/nicktangithub/EmoPic/main/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/banditsdesign/EmoPic/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>5oaP1cM+lnssZatHROItW+NGFdZ62BnhV3fd0EDC3ro=</string>
 	<key>SUEnableAutomaticChecks</key>

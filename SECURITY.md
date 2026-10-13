@@ -7,7 +7,7 @@ taken seriously even though the app has no accounts, no server and no telemetry.
 
 ## Reporting a vulnerability
 
-**Preferred:** [report privately via GitHub](https://github.com/nicktangithub/EmoPic/security/advisories/new)
+**Preferred:** [report privately via GitHub](https://github.com/banditsdesign/EmoPic/security/advisories/new)
 — *Report a vulnerability* opens a private advisory that only you and the maintainers can see.
 (If that option is missing, private vulnerability reporting hasn't been enabled on the repo yet;
 use the email below instead.)
@@ -34,10 +34,10 @@ No bounty — EmoPic is free and open source — but disclosure credit is on off
 | 1.0.x   | ✅        |
 | < 1.0   | ❌        |
 
-Fixes ship to the [latest release](https://github.com/nicktangithub/EmoPic/releases/latest) on
+Fixes ship to the [latest release](https://github.com/banditsdesign/EmoPic/releases/latest) on
 GitHub. Because EmoPic has no auto-update mechanism yet, patching means downloading a new DMG
 — check the release page periodically (built-in update checking is
-[planned](https://github.com/nicktangithub/EmoPic/issues/2)).
+[planned](https://github.com/banditsdesign/EmoPic/issues/2)).
 
 ## Verifying what you downloaded
 
