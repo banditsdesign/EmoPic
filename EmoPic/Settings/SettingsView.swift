@@ -15,6 +15,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case emojiPicker = "Emoji Picker"
     case colonShortcuts = "Colon Shortcuts"
     case excludedApps = "Excluded Apps"
+    case customDescriptions = "Custom Descriptions"
     case about = "About"
 
     var id: String { rawValue }
@@ -27,6 +28,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .emojiPicker: return "face.smiling"
         case .colonShortcuts: return "keyboard"
         case .excludedApps: return "minus.circle"
+        case .customDescriptions: return "text.badge.plus"
         case .about: return "info.circle"
         }
     }
@@ -43,6 +45,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .emojiPicker: EmojiPickerSettingsView()
         case .colonShortcuts: ColonShortcutsSettingsView()
         case .excludedApps: ExcludedAppsView()
+        case .customDescriptions: CustomDescriptionsSettingsView()
         case .about: AboutView()
         }
     }
@@ -278,6 +281,120 @@ struct ExcludedAppsView: View {
             guard let id = bundleID, !settings.excludedApps.contains(id) else { return }
             settings.excludedApps.append(id)
         }
+    }
+}
+
+// MARK: - Custom Descriptions
+
+/// Management list for user-assigned emoji descriptions (issue #1): every
+/// customised emoji with its text, inline-editable and removable. New tags
+/// are assigned from the picker itself (right-click an emoji), which is why
+/// there is no Add button here — the emoji grid is the picker for that.
+struct CustomDescriptionsSettingsView: View {
+    @ObservedObject private var store = CustomDescriptionStore.shared
+    @State private var searchQuery = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Your words join each emoji's keywords — search and :colon: suggestions match them — and show as the emoji's tooltip. Right-click an emoji in the picker to add one.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            TextField("Search customised emoji…", text: $searchQuery)
+                .textFieldStyle(.roundedBorder)
+
+            let rows = store.descriptions
+                .compactMap { id, text -> (emoji: EmojiItem, text: String)? in
+                    // Skip ids from older dataset versions that no longer resolve.
+                    guard let emoji = EmojiDataManager.shared.itemByID[id] else { return nil }
+                    return (emoji, text)
+                }
+                .filter {
+                    searchQuery.isEmpty
+                        || $0.text.localizedCaseInsensitiveContains(searchQuery)
+                        || $0.emoji.name.localizedCaseInsensitiveContains(searchQuery)
+                }
+                .sorted { $0.emoji.name < $1.emoji.name }
+
+            List {
+                ForEach(rows, id: \.emoji.id) { row in
+                    CustomDescriptionRow(emojiID: row.emoji.id,
+                                       name: row.emoji.name,
+                                       glyph: row.emoji.emoji,
+                                       text: row.text)
+                }
+            }
+            .overlay {
+                if rows.isEmpty {
+                    Text(searchQuery.isEmpty
+                         ? "No custom descriptions yet — right-click an emoji in the picker to add one."
+                         : "No custom descriptions match “\(searchQuery)”.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(20)
+    }
+}
+
+/// One row: emoji glyph, built-in name, and an inline editor for the custom
+/// text. Drafts commit on Return or when the field gives up focus (not per
+/// keystroke), so the search indexes rebuild once per edit, not per letter.
+private struct CustomDescriptionRow: View {
+    let emojiID: String
+    let name: String
+    let glyph: String
+    let text: String
+
+    @ObservedObject private var store = CustomDescriptionStore.shared
+    @State private var draft: String
+    @FocusState private var focused: Bool
+
+    init(emojiID: String, name: String, glyph: String, text: String) {
+        self.emojiID = emojiID
+        self.name = name
+        self.glyph = glyph
+        self.text = text
+        _draft = State(initialValue: text)
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(glyph)
+                .font(.system(size: 22))
+                .frame(width: 28, alignment: .center)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("keywords…", text: $draft)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focused)
+                    .onSubmit(commit)
+                    .onChange(of: focused) {
+                        if !focused { commit() }
+                    }
+            }
+            Spacer(minLength: 0)
+            Button {
+                store.remove(emojiID)
+            } label: {
+                Image(systemName: "minus.circle")
+            }
+            .buttonStyle(.borderless)
+            .help("Remove the custom description for \(name)")
+            .accessibilityLabel("Remove custom description for \(name)")
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func commit() {
+        let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed != text else { return }
+        // Empty text removes the entry (store rule); the row then disappears.
+        store.set(trimmed, for: emojiID)
     }
 }
 

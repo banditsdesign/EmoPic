@@ -243,7 +243,9 @@ private struct ColonSuggestionView: View {
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.primary)
                         Spacer(minLength: 4)
-                        Text(suggestion.emoji.name)
+                        // Custom description when the user set one (issue #1),
+                        // otherwise the built-in name as before.
+                        Text(suggestion.emoji.displayDescription)
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                             .lineLimit(1)

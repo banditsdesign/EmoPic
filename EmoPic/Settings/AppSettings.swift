@@ -117,6 +117,14 @@ final class AppSettings: ObservableObject {
         didSet { if !isLoading { save(Keys.settingsTab) } }
     }
 
+    /// User-assigned custom emoji descriptions (issue #1): emoji id → free
+    /// text. `[String: String]` is plist-safe, so UserDefaults stores it
+    /// directly like the other lists. Deliberately absent from
+    /// `legacyKeyNames` — v1.0 never wrote this key.
+    @Published var customEmojiDescriptions: [String: String] = [:] {
+        didSet { if !isLoading { save(Keys.customDescriptions) } }
+    }
+
     // MARK: - Convenience
 
     var usesSkinTone: Bool { selectedSkinTone != .default }
@@ -166,6 +174,7 @@ final class AppSettings: ObservableObject {
         static let hotKeyEnabled = "hotKeyEnabled"
         static let settingsTab = "settingsTab"
         static let launchAtLogin = "launchAtLogin"
+        static let customDescriptions = "customEmojiDescriptions"
     }
 
     // MARK: - Persistence
@@ -188,6 +197,7 @@ final class AppSettings: ObservableObject {
         case Keys.hotKeyEnabled: suite.set(hotKeyEnabled, forKey: key)
         case Keys.settingsTab: suite.set(settingsTab, forKey: key)
         case Keys.launchAtLogin: suite.set(launchAtLogin, forKey: key)
+        case Keys.customDescriptions: suite.set(customEmojiDescriptions, forKey: key)
         default: break
         }
     }
@@ -207,5 +217,6 @@ final class AppSettings: ObservableObject {
         hotKeyEnabled = suite.object(forKey: Keys.hotKeyEnabled) as? Bool ?? true
         settingsTab = suite.string(forKey: Keys.settingsTab) ?? "Emoji Picker"
         launchAtLogin = suite.object(forKey: Keys.launchAtLogin) as? Bool ?? false
+        customEmojiDescriptions = suite.dictionary(forKey: Keys.customDescriptions) as? [String: String] ?? [:]
     }
 }

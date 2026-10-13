@@ -19,6 +19,9 @@ struct EmojiPickerView: View {
     /// id of the search row currently showing the tone chooser — keyed per
     /// row so all rows don't present the popover at once.
     @State private var searchSkinToneID: String?
+    /// Emoji whose custom-description sheet is open (issue #1). One sheet at
+    /// the picker level — per-cell sheets would race with the tone popovers.
+    @State private var editingEmoji: EmojiItem?
 
     /// Single pick path for every tab (grid cells and search rows), so a
     /// click behaves identically everywhere ("Keep visual and interaction
@@ -88,6 +91,16 @@ struct EmojiPickerView: View {
             }
         }
         .frame(width: 360, height: 420)
+        .sheet(
+            isPresented: Binding(
+                get: { editingEmoji != nil },
+                set: { if !$0 { editingEmoji = nil } }
+            )
+        ) {
+            if let emoji = editingEmoji {
+                EmojiDescriptionEditor(emoji: emoji)
+            }
+        }
     }
 
     // MARK: - Frequent view
@@ -173,6 +186,14 @@ struct EmojiPickerView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
+                        // The user's own tag (issue #1), accented so it reads
+                        // as theirs, not part of the built-in metadata.
+                        if !emoji.customDescription.isEmpty {
+                            Text(emoji.customDescription)
+                                .font(.caption)
+                                .foregroundStyle(.tint)
+                                .lineLimit(1)
+                        }
                     }
                     Spacer(minLength: 0)
                 }
@@ -180,6 +201,10 @@ struct EmojiPickerView: View {
                 .padding(.vertical, 2)
             }
             .buttonStyle(.plain)
+            .help(emoji.displayDescription)
+            .contextMenu {
+                Button(editingContextTitle(for: emoji)) { editingEmoji = emoji }
+            }
             .popover(
                 isPresented: Binding(
                     get: { searchSkinToneID == emoji.id },
@@ -217,6 +242,10 @@ struct EmojiPickerView: View {
             }
         }
         .buttonStyle(.plain)
+        .help(emoji.displayDescription)
+        .contextMenu {
+            Button(editingContextTitle(for: emoji)) { editingEmoji = emoji }
+        }
         // Scoped cursor change via push/pop — SwiftUI has no .pointOnHover()
         // on macOS (checked the Xcode 27 SDK interface), and set()/set()
         // alternatives clobber cursors owned by other views.
@@ -245,6 +274,15 @@ struct EmojiPickerView: View {
                 presentSkinTone(emoji)
             }
         }
+    }
+
+    /// Context-menu label for the description editor. Shows the existing tag
+    /// (truncated) so users can spot customised emoji without hovering.
+    private func editingContextTitle(for emoji: EmojiItem) -> String {
+        let custom = emoji.customDescription
+        guard !custom.isEmpty else { return "Edit Description…" }
+        let preview = custom.count > 24 ? String(custom.prefix(24)) + "…" : custom
+        return "Edit Description — \(preview)"
     }
 
     // MARK: - Skin tone chooser (shared by grid cells and search rows)
@@ -284,5 +322,84 @@ struct EmojiPickerView: View {
             .padding(.bottom, 4)
         }
         .fixedSize()
+    }
+}
+
+// MARK: - Custom description editor (issue #1)
+
+/// Sheet for assigning free-form keywords to one emoji, opened from the
+/// picker's context menu (grid cells and search rows). The words join the
+/// emoji's searchable keywords and the text becomes its label/tooltip;
+/// empty text (or Remove) clears it.
+struct EmojiDescriptionEditor: View {
+    let emoji: EmojiItem
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var text: String
+
+    init(emoji: EmojiItem) {
+        self.emoji = emoji
+        _text = State(initialValue: emoji.customDescription)
+    }
+
+    private var trimmed: String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Custom description")
+                .font(.headline)
+
+            HStack(spacing: 10) {
+                Text(emoji.emoji)
+                    .font(.system(size: 34))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(emoji.name)
+                        .font(.subheadline)
+                    Text(emoji.aliases.prefix(3).joined(separator: " · "))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            TextField("e.g. bob, office mascot", text: $text)
+                .textFieldStyle(.roundedBorder)
+                .onChange(of: text) {
+                    if text.count > CustomDescriptionStore.maxLength {
+                        text = String(text.prefix(CustomDescriptionStore.maxLength))
+                    }
+                }
+                .onSubmit(save)
+
+            Text("Its words join this emoji's search keywords — picker search and :colon: suggestions will match them — and it shows as the emoji's tooltip. Separate words with spaces; clear the text to remove.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack {
+                if !emoji.customDescription.isEmpty {
+                    Button("Remove") {
+                        CustomDescriptionStore.shared.remove(emoji.id)
+                        dismiss()
+                    }
+                }
+                Spacer()
+                Button("Cancel") { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+                Button("Save") { save() }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(trimmed.isEmpty)
+            }
+        }
+        .padding(20)
+        .frame(width: 360)
+    }
+
+    private func save() {
+        guard !trimmed.isEmpty else { return }
+        CustomDescriptionStore.shared.set(text, for: emoji.id)
+        dismiss()
     }
 }

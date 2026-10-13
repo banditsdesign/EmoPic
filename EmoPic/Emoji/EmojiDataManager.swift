@@ -24,6 +24,12 @@ final class EmojiDataManager: ObservableObject {
 
     private var loaded = false
 
+    /// The dataset as loaded, before custom descriptions were applied
+    /// (issue #1). Kept so `refreshCustomDescriptions()` can re-apply from
+    /// scratch — descriptions added, edited and removed over the session
+    /// never stack or go stale — without re-reading the JSON.
+    private var pristineEmojiList: [EmojiItem] = []
+
     /// True if any known emoji alias/name starts with `buffer`.
     /// Used by EmojiShortcutMonitor to decide "keep buffering vs abort".
     func hasPrefix(_ buffer: String) -> Bool {
@@ -114,10 +120,11 @@ final class EmojiDataManager: ObservableObject {
             }
         }
 
-        // 3. Name-substring fillers while slots remain.
+        // 3. Name-substring fillers while slots remain (custom text counts
+        // too, so "bo" surfaces an emoji tagged "office mascot").
         if out.count < limit {
             let nameHits = emojiList
-                .filter { $0.nameLower.contains(q) }
+                .filter { $0.nameLower.contains(q) || $0.customLower.contains(q) }
                 .sorted {
                     let ra = FrequentEmojiStore.shared.rank(of: $0.id)
                     let rb = FrequentEmojiStore.shared.rank(of: $1.id)
@@ -140,13 +147,41 @@ final class EmojiDataManager: ObservableObject {
     func loadEmojiData() {
         guard !loaded else { return }
         if let items = loadBundled() {
-            emojiList = items; rebuildIndexes(); loaded = true; return
+            adopt(items); loaded = true; return
         }
         if let items = loadFromDiskCache() {
-            emojiList = items; rebuildIndexes(); loaded = true
+            adopt(items); loaded = true
             // Late load (bundled JSON missing) — recents mapped over an empty
             // list at launch; refresh them now that the dataset exists.
             FrequentEmojiStore.shared.update()
+        }
+    }
+
+    /// Single adoption path: remember the pristine dataset, overlay the
+    /// user's custom descriptions, and build every index from that.
+    private func adopt(_ items: [EmojiItem]) {
+        pristineEmojiList = items
+        applyCustomDescriptions(CustomDescriptionStore.shared.descriptions)
+        rebuildIndexes()
+    }
+
+    // MARK: - Custom descriptions (issue #1)
+
+    /// Re-map the stored custom descriptions onto the dataset and rebuild the
+    /// search indexes. Called by `CustomDescriptionStore` after every edit —
+    /// ~1,900 value copies plus an index rebuild, once per user action, never
+    /// on the keystroke hot path.
+    func refreshCustomDescriptions() {
+        guard loaded else { return }
+        applyCustomDescriptions(CustomDescriptionStore.shared.descriptions)
+        rebuildIndexes()
+    }
+
+    private func applyCustomDescriptions(_ descriptions: [String: String]) {
+        guard !descriptions.isEmpty else { emojiList = pristineEmojiList; return }
+        emojiList = pristineEmojiList.map { item in
+            guard let text = descriptions[item.id] else { return item }
+            return item.applyingCustomDescription(text)
         }
     }
 
@@ -220,6 +255,14 @@ final class EmojiDataManager: ObservableObject {
             }
             aliasMap[e.nameLower] = e
             insertPrefixes(of: e.nameLower)
+            // Custom keywords (issue #1): indexed like aliases so picker
+            // search, `hasPrefix` buffering and the colon popup all see
+            // them. Written last so a user's keyword wins the exact-match
+            // slot over a builtin alias — user intent takes precedence.
+            for word in e.customWordsLower {
+                aliasMap[word] = e
+                insertPrefixes(of: word)
+            }
         }
         sortedAliases = aliasMap.keys.sorted()
         for key in Array(byCategory.keys) {

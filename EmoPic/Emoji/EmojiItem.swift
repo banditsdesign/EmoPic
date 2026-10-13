@@ -38,6 +38,25 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
     var aliasesLower: [String] = []
     var haystackLower: String = ""
 
+    // MARK: - Custom description (issue #1)
+    //
+    // User-assigned free text for one emoji: extra keywords that search and
+    // :colon: suggestions match, shown as a tooltip/label. User data lives in
+    // `CustomDescriptionStore`; `EmojiDataManager` applies it onto items at
+    // load and on every edit, so views just read these fields. Excluded from
+    // coding — never leaves the machine, and the bundled dataset must not
+    // carry it.
+
+    /// The user's description verbatim (trimmed), "" when none is set.
+    var customDescription: String = ""
+
+    /// Whole description, lowercased — substring matching.
+    var customLower: String = ""
+
+    /// Description split into lowercase keyword words (punctuation stripped,
+    /// single characters dropped) — exact-word matching and alias indexing.
+    var customWordsLower: [String] = []
+
     private enum CodingKeys: String, CodingKey {
         case id, emoji, name, aliases, version, category, usageScore
     }
@@ -77,18 +96,26 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
     // MARK: - Search helpers
 
     var searchableText: String {
-        ([name] + aliases).joined(separator: " ")
+        ([name] + aliases + [customDescription]).joined(separator: " ")
+    }
+
+    /// What the UI shows as this emoji's label/tooltip: the user's custom
+    /// description when set, otherwise the built-in name.
+    var displayDescription: String {
+        customDescription.isEmpty ? name : customDescription
     }
 
     func matchesQuery(_ query: String) -> Bool {
         let q = query.lowercased()
-        return nameLower.contains(q) || aliasesLower.contains(q)
+        return nameLower.contains(q) || aliasesLower.contains(q) || customLower.contains(q)
     }
 
     func relevanceScore(for query: String) -> Int {
         let q = query.lowercased()
         if nameLower == q { return 100 }
         if aliasesLower.contains(q) { return 100 }
+        // A keyword the user explicitly tagged is an exact-intent match.
+        if customWordsLower.contains(q) { return 100 }
         if nameLower.contains(q) { return 50 }
         if let idx = aliasesLower.firstIndex(where: { $0 == q }) {
             return 40 - idx * 5
@@ -108,10 +135,11 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
     /// Create a skin tone variant. The variant keeps the BASE emoji's id so
     /// usage recording stays keyed to one logical emoji — otherwise a
     /// skin-toned insert would record an id (`👋🏿`) that never matches any
-    /// dataset entry and silently drop out of the recents list.
+    /// dataset entry and silently drop out of the recents list. Custom
+    /// descriptions are keyed by the same id, so the variant inherits them.
     func withSkinTone(_ tone: SkinTone) -> EmojiItem {
         let combined = emoji + tone.emoji
-        return EmojiItem(
+        let variant = EmojiItem(
             emoji: combined,
             name: name,
             aliases: aliases,
@@ -119,6 +147,32 @@ struct EmojiItem: Identifiable, Codable, Hashable, Sendable {
             category: category,
             id: id
         )
+        return customDescription.isEmpty ? variant : variant.applyingCustomDescription(customDescription)
+    }
+
+    // MARK: - Custom description (issue #1)
+
+    /// Copy with a custom description applied and every derived search field
+    /// (keyword list, haystack) recomputed. Empty/whitespace text clears it.
+    func applyingCustomDescription(_ text: String) -> EmojiItem {
+        var copy = self
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        copy.customDescription = trimmed
+        let lower = trimmed.lowercased()
+        copy.customLower = lower
+        // Keyword words: letters/digits/underscore/apostrophe runs, ≥2
+        // chars, apostrophes then dropped inside the word — so "Bob's
+        // wave!" indexes "bobs" and "wave" (searching "bobs" finds a
+        // "Bob's" tag) without splitting on the apostrophe or keeping
+        // bare noise like "!".
+        copy.customWordsLower = lower
+            .split(whereSeparator: { !$0.isLetter && !$0.isNumber && $0 != "_" && $0 != "'" })
+            .map { word in word.filter { $0 != "'" } }
+            .filter { $0.count >= 2 }
+        // Fold the custom text into the haystack so partial queries score
+        // like name/alias substrings.
+        copy.haystackLower = ([nameLower] + aliasesLower + customWordsLower).joined(separator: " ")
+        return copy
     }
 }
 
