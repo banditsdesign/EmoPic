@@ -121,4 +121,4 @@ introduces it, and this document updated in the same release.
 
 ## Questions
 
-Open an issue, or email `nick@banditsdesign.com.au`.
+Open an issue, or email `dev@banditsdesign.com.au`.

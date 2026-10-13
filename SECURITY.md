@@ -12,7 +12,7 @@ taken seriously even though the app has no accounts, no server and no telemetry.
 (If that option is missing, private vulnerability reporting hasn't been enabled on the repo yet;
 use the email below instead.)
 
-**Email:** `nick@banditsdesign.com.au`
+**Email:** `dev@banditsdesign.com.au`
 
 Please don't open a public issue for anything that is actually exploitable. Ordinary bugs,
 crashes and UX problems are very welcome as regular issues.
