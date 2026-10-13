@@ -401,9 +401,13 @@ private struct CustomDescriptionRow: View {
 // MARK: - About
 
 struct AboutView: View {
+    @ObservedObject private var settings = AppSettings.shared
+    @ObservedObject private var updater = Updater.shared
+
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
+
             Image(systemName: "face.smiling")
                 .font(.system(size: 64))
                 .foregroundStyle(.secondary)
@@ -415,14 +419,66 @@ struct AboutView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            Text("A native macOS menu-bar emoji picker.\nType emoji instantly — no subscriptions, no cloud.")
+            Text("A native macOS menu-bar emoji picker.\nType emoji instantly — no subscriptions, no account.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+
             Spacer()
+
+            Divider()
+
+            // Issue #2: software-update controls live here rather than in a pane
+            // of their own — the settings toolbar already carries five items, and
+            // a sixth would start overflowing behind a chevron menu, which is
+            // precisely what the AppKit tab rewrite was done to avoid
+            // (apple-hig `tab-bars.md`: "Avoid overflow").
+            VStack(alignment: .leading, spacing: 8) {
+                SectionLabel("Software Update")
+
+                Toggle("Automatically check for updates", isOn: autoCheckBinding)
+                    .toggleStyle(.switch)
+
+                Text("Looks for a new release on GitHub once a week. EmoPic sends no identifiers and no system information, and will ask before downloading and again before restarting.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 10) {
+                    Button("Check Now…") { updater.checkNow() }
+                        .disabled(!updater.canCheckForUpdates)
+
+                    if !updater.statusText.isEmpty {
+                        Text(updater.statusText)
+                            .font(.caption)
+                            .foregroundStyle(statusIsError ? Color.red : Color.secondary)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                if let lastCheck = settings.lastUpdateCheck {
+                    Text("Last checked \(lastCheck.formatted(date: .abbreviated, time: .shortened)).")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(20)
+    }
+
+    /// The switch drives Sparkle through `Updater`, which persists the choice
+    /// and keeps the live updater in step.
+    private var autoCheckBinding: Binding<Bool> {
+        Binding(
+            get: { settings.automaticallyCheckForUpdates },
+            set: { updater.setAutomaticallyChecksForUpdates($0) }
+        )
+    }
+
+    private var statusIsError: Bool {
+        if case .failed = updater.phase { return true }
+        return false
     }
 }
 

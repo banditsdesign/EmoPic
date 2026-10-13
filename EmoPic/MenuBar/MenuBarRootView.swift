@@ -15,6 +15,7 @@ import SwiftUI
 /// menu short and scannable ("Be mindful of menu length", menus.md).
 struct MenuBarRootView: View {
     @ObservedObject private var monitor = EmojiShortcutMonitor.shared
+    @ObservedObject private var updater = Updater.shared
 
     var body: some View {
         Button("Open Emoji Picker") {
@@ -40,6 +41,15 @@ struct MenuBarRootView: View {
             SettingsWindow.shared.show()
         }
         .keyboardShortcut(",", modifiers: .command)
+
+        // Issue #2: manual update check. Grouped with the app-management items
+        // rather than lengthening the top of the menu, retitles itself once an
+        // update has been found, and goes dim while Sparkle is mid-session (it
+        // rejects re-entrant checks).
+        Button(updater.menuItemTitle) {
+            updater.checkNow()
+        }
+        .disabled(!updater.canCheckForUpdates)
 
         Divider()
 

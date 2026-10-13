@@ -13,3 +13,10 @@ DerivedData/
 
 # Local agent tooling (vendored apple-hig skill)
 /.dsh/
+
+# Sparkle EdDSA signing material must never be committed. The private key lives
+# in the macOS Keychain (see docs/RELEASE_PROCESS.md, local only); these rules
+# are a safety net in case a keygen run drops the files in the repo anyway.
+eddsa_private_key
+eddsa_public_key
+*.eddsa_private_key

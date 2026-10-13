@@ -32,5 +32,24 @@
 	<string>Copyright © 2026 Nick Tan. MIT License.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<!-- Software updates (issue #2). Sparkle only reaches the network when the
+	     user opts in: SUEnableAutomaticChecks is false here *and* defaults to
+	     false in AppSettings, so a fresh install makes no connection at all. -->
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/nicktangithub/EmoPic/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>5oaP1cM+lnssZatHROItW+NGFdZ62BnhV3fd0EDC3ro=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<false/>
+	<key>SUAllowsAutomaticUpdates</key>
+	<true/>
+	<key>SUEnableSystemProfiling</key>
+	<false/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>604800</integer>
+	<!-- Only exercised if the installed app isn't user-writable (e.g. dragged
+	     in by an admin); lets Sparkle use its launcher XPC instead of failing. -->
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
 </dict>
 </plist>

@@ -125,6 +125,26 @@ final class AppSettings: ObservableObject {
         didSet { if !isLoading { save(Keys.customDescriptions) } }
     }
 
+    /// Issue #2: may EmoPic contact GitHub for update checks without being
+    /// asked each time? Deliberately off by default — the app makes no network
+    /// connection until the user says otherwise (see PRIVACY.md).
+    ///
+    /// Sparkle keeps its own mirror of this in `SUEnableAutomaticChecks` in the
+    /// same domain; `Updater` applies this value to the live updater. Stored on
+    /// our side so the preference is observable without instantiating Sparkle
+    /// (the unit tests run without an updater), and so the Settings switch can
+    /// never claim a state the updater didn't accept — same reasoning as
+    /// `launchAtLogin` mirroring the real `SMAppService` registration.
+    @Published var automaticallyCheckForUpdates: Bool = false {
+        didSet { if !isLoading { save(Keys.automaticallyCheckForUpdates) } }
+    }
+
+    /// When the last update check actually happened; display only, so it is
+    /// re-written on every check rather than migrated or synced.
+    @Published var lastUpdateCheck: Date? {
+        didSet { if !isLoading { save(Keys.lastUpdateCheck) } }
+    }
+
     // MARK: - Convenience
 
     var usesSkinTone: Bool { selectedSkinTone != .default }
@@ -175,6 +195,8 @@ final class AppSettings: ObservableObject {
         static let settingsTab = "settingsTab"
         static let launchAtLogin = "launchAtLogin"
         static let customDescriptions = "customEmojiDescriptions"
+        static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
+        static let lastUpdateCheck = "lastUpdateCheck"
     }
 
     // MARK: - Persistence
@@ -198,6 +220,8 @@ final class AppSettings: ObservableObject {
         case Keys.settingsTab: suite.set(settingsTab, forKey: key)
         case Keys.launchAtLogin: suite.set(launchAtLogin, forKey: key)
         case Keys.customDescriptions: suite.set(customEmojiDescriptions, forKey: key)
+        case Keys.automaticallyCheckForUpdates: suite.set(automaticallyCheckForUpdates, forKey: key)
+        case Keys.lastUpdateCheck: suite.set(lastUpdateCheck, forKey: key)
         default: break
         }
     }
@@ -218,5 +242,7 @@ final class AppSettings: ObservableObject {
         settingsTab = suite.string(forKey: Keys.settingsTab) ?? "Emoji Picker"
         launchAtLogin = suite.object(forKey: Keys.launchAtLogin) as? Bool ?? false
         customEmojiDescriptions = suite.dictionary(forKey: Keys.customDescriptions) as? [String: String] ?? [:]
+        automaticallyCheckForUpdates = suite.object(forKey: Keys.automaticallyCheckForUpdates) as? Bool ?? false
+        lastUpdateCheck = suite.object(forKey: Keys.lastUpdateCheck) as? Date
     }
 }

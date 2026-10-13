@@ -9,6 +9,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         EmojiShortcutMonitor.shared.requestPermissionIfNeeded()
         EmojiShortcutMonitor.shared.start()
         GlobalHotKey.shared.register()
+        // Issue #2: Sparkle. Starts idle — it will not reach the network until
+        // the user opts in via Settings → About (SUEnableAutomaticChecks is
+        // false in Info.plist and defaults to off in AppSettings).
+        Updater.shared.start()
     }
 
     func applicationWillTerminate(_: Notification) {

@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		66B523B347120B38503A28F7 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 5959A4098B81EA1D95872288 /* Sparkle */; };
 		739CA301307C9CCF002EAF52 /* EmoPic.icon in Resources */ = {isa = PBXBuildFile; fileRef = 739CA300307C9CCF002EAF52 /* EmoPic.icon */; };
+		74D21C86C438D935209C0A46 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C87E0E2EB0966A499F0BC7 /* Updater.swift */; };
 		A10001 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10010 /* App.swift */; };
 		A10002 /* EmoPic-App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10011 /* EmoPic-App.swift */; };
 		A10003 /* EmojiCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10012 /* EmojiCategory.swift */; };
@@ -38,6 +40,7 @@
 		B000BF4 /* ColonBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R4 /* ColonBufferTests.swift */; };
 		B000BF5 /* ColonSuggestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R5 /* ColonSuggestionTests.swift */; };
 		B000BF6 /* CustomDescriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R6 /* CustomDescriptionTests.swift */; };
+		E05A6773000860F526361C44 /* UpdateSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +54,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdateSettingsTests.swift; sourceTree = "<group>"; };
+		41C87E0E2EB0966A499F0BC7 /* Updater.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
 		739CA300307C9CCF002EAF52 /* EmoPic.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = EmoPic.icon; sourceTree = "<group>"; };
 		A000102 /* SettingsWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		A000103 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -93,6 +98,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10020 /* ApplicationServices.framework in Frameworks */,
+				66B523B347120B38503A28F7 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -113,6 +119,7 @@
 				A000RG /* Resources */,
 				A1001F /* Info.plist */,
 				739CA300307C9CCF002EAF52 /* EmoPic.icon */,
+				F51C23299CA22AF0CEBF92C2 /* Updates */,
 			);
 			path = EmoPic;
 			sourceTree = "<group>";
@@ -239,8 +246,18 @@
 				B000R4 /* ColonBufferTests.swift */,
 				B000R5 /* ColonSuggestionTests.swift */,
 				B000R6 /* CustomDescriptionTests.swift */,
+				06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */,
 			);
 			path = EmoPicTests;
+			sourceTree = "<group>";
+		};
+		F51C23299CA22AF0CEBF92C2 /* Updates */ = {
+			isa = PBXGroup;
+			children = (
+				41C87E0E2EB0966A499F0BC7 /* Updater.swift */,
+			);
+			name = Updates;
+			path = Updates;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -259,6 +276,9 @@
 			dependencies = (
 			);
 			name = EmoPic;
+			packageProductDependencies = (
+				5959A4098B81EA1D95872288 /* Sparkle */,
+			);
 			productName = EmoPic;
 			productReference = A000FF /* EmoPic.app */;
 			productType = "com.apple.product-type.application";
@@ -306,6 +326,9 @@
 				Base,
 			);
 			mainGroup = A000G8;
+			packageReferences = (
+				300D65EC19B6E432F6A3F7AC /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = A000G9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -355,6 +378,7 @@
 				A10028 /* ColonBuffer.swift in Sources */,
 				A10029 /* ColonSuggestionPanel.swift in Sources */,
 				A1002A /* CustomDescriptionStore.swift in Sources */,
+				74D21C86C438D935209C0A46 /* Updater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,6 +392,7 @@
 				B000BF4 /* ColonBufferTests.swift in Sources */,
 				B000BF5 /* ColonSuggestionTests.swift in Sources */,
 				B000BF6 /* CustomDescriptionTests.swift in Sources */,
+				E05A6773000860F526361C44 /* UpdateSettingsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,7 +438,6 @@
 				CODE_SIGN_IDENTITY = "Developer ID Application: NICHOLAS TAN (MLT7DK5FRB)";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 4;
-				MARKETING_VERSION = 1.0.3;
 				DEVELOPMENT_TEAM = MLT7DK5FRB;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_TESTABILITY = YES;
@@ -421,13 +445,14 @@
 				INFOPLIST_FILE = EmoPic/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSAccessibilityUsageDescription = "EmoPic needs accessibility access to insert emoji into text fields in other apps.";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Nick Tan. MIT License.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = net.emopic.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -441,28 +466,28 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = EmoPic;
 				CODE_SIGN_IDENTITY = "Developer ID Application: NICHOLAS TAN (MLT7DK5FRB)";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 4;
-				MARKETING_VERSION = 1.0.3;
 				DEVELOPMENT_TEAM = MLT7DK5FRB;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EmoPic/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSAccessibilityUsageDescription = "EmoPic needs accessibility access to insert emoji into text fields in other apps.";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Nick Tan. MIT License.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.3;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				PRODUCT_BUNDLE_IDENTIFIER = net.emopic.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.9;				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				OTHER_CODE_SIGN_FLAGS = "--timestamp";
-
+				SWIFT_VERSION = 5.9;
 			};
 			name = Release;
 		};
@@ -474,11 +499,11 @@
 				CODE_SIGN_IDENTITY = "Developer ID Application: NICHOLAS TAN (MLT7DK5FRB)";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 4;
-				MARKETING_VERSION = 1.0.3;
 				DEVELOPMENT_TEAM = MLT7DK5FRB;
 				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = net.emopic.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.9;
@@ -492,18 +517,18 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGNING_ALLOWED = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application: NICHOLAS TAN (MLT7DK5FRB)";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 4;
-				MARKETING_VERSION = 1.0.3;
 				DEVELOPMENT_TEAM = MLT7DK5FRB;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.3;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				PRODUCT_BUNDLE_IDENTIFIER = net.emopic.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.9;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EmoPic.app/Contents/MacOS/EmoPic";				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				OTHER_CODE_SIGN_FLAGS = "--timestamp";
-
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EmoPic.app/Contents/MacOS/EmoPic";
 			};
 			name = Release;
 		};
@@ -538,6 +563,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		300D65EC19B6E432F6A3F7AC /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5959A4098B81EA1D95872288 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 300D65EC19B6E432F6A3F7AC /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A000P0 /* Project object */;
 }
