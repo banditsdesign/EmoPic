@@ -35,9 +35,9 @@ No bounty — EmoPic is free and open source — but disclosure credit is on off
 | < 1.0   | ❌        |
 
 Fixes ship to the [latest release](https://github.com/banditsdesign/EmoPic/releases/latest) on
-GitHub. Because EmoPic has no auto-update mechanism yet, patching means downloading a new DMG
-— check the release page periodically (built-in update checking is
-[planned](https://github.com/banditsdesign/EmoPic/issues/2)).
+GitHub. EmoPic 1.0.4 and later can also check for updates automatically once you enable it in
+Settings → About (off by default) — but until that version reached users, plan on downloading a
+new DMG and checking the release page.
 
 ## Verifying what you downloaded
 
@@ -94,4 +94,5 @@ Not a substitute for reporting real issues, but useful context for triage:
   check and the text is left alone.
 - Secure input (password fields) and user-excluded apps are skipped.
 - Clipboard fallback saves and restores the previous pasteboard contents, guarded by change count.
-- No network access whatsoever in the current release — see [PRIVACY.md](PRIVACY.md).
+- Network use is limited to the opt-in update check — off by default, and exactly what it sends
+  is spelled out in [PRIVACY.md](PRIVACY.md).

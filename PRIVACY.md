@@ -1,21 +1,42 @@
 # Privacy Policy
 
-**EmoPic makes no network connections. It has no server, no account system, no analytics, no
-crash reporting and no advertising SDK.** Nothing you type, pick or name leaves your Mac.
+**EmoPic has no server, no accounts, no analytics, no crash reporting and no advertising SDK —
+and by default it makes no network connection at all.** Nothing you type, pick or name leaves
+your Mac. The single exception is the software-update check, which you have to turn on; exactly
+what it sends is set out below.
 
 This document describes exactly what the app stores and touches, and how to erase it.
 
 ## Network
 
-- **Current release (1.0.x): zero network access.** The emoji dataset is bundled inside the
-  signed app bundle, so there is no reason to reach out — an earlier build had a dataset download
-  fallback; it was removed precisely to eliminate the app's only network surface.
-- **Planned (issue #2, auto-update):** an *opt-in* update check. When — and only when — you
-  enable it, the app will contact GitHub to look for a newer release. The design intent, which
-  will be documented here when it ships: no sign-in, no unique or hardware identifier, no
-  analytics beyond the basic request GitHub logs anyway (IP, user agent), a plain
-  `EmoPic/<version>` user agent, and Apple's optional system-profiling extras left disabled.
-  Automatic checking will default to **off**.
+**By default EmoPic makes no network connections at all.** No analytics, no crash reporting, no
+accounts, no ads, no background phone-home. The emoji dataset is bundled inside the signed app
+bundle, so there is nothing to fetch — an earlier build had a dataset download fallback, and it
+was deleted precisely to remove the app's only network surface.
+
+The one exception is software updates, and it is opt-in. EmoPic contacts GitHub only if you:
+
+- turn on **Automatically check for updates** (Settings → About — **off by default**), or
+- choose **Check for Updates…** from the menu bar yourself.
+
+When you do, the app fetches one small file — the release feed — from `raw.githubusercontent.com`.
+If an update is found and you choose to install it, it downloads the package from GitHub Releases
+and asks again before restarting.
+
+What that request carries:
+
+- the app version, in the user agent string (e.g. `EmoPic/1.0.4`);
+- **nothing else about your machine** — Apple's optional system profiling is disabled
+  (`SUEnableSystemProfiling = false` and `sendsSystemProfile = false`), so no macOS version,
+  hardware model, language list or usage data is sent;
+- no sign-in, no account, and no unique, persistent or hardware identifier.
+
+GitHub's servers still see what they see for any web request — IP address, timestamp, user agent —
+and log it under their
+[privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+Builds 1.0 through 1.0.3 predate the update mechanism and make no network connection under any
+circumstances.
 
 ## Permissions, and what they are used for
 
@@ -95,9 +116,8 @@ To revoke permissions: **System Settings → Privacy & Security → Accessibilit
 
 ## Changes
 
-If this policy changes — for example when auto-update lands — the change will be described in
-the release notes for the version that introduces it, and this document updated in the same
-release.
+If this policy changes, the change will be described in the release notes for the version that
+introduces it, and this document updated in the same release.
 
 ## Questions
 
