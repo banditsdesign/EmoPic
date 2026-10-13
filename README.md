@@ -34,7 +34,7 @@ Right-click an emoji in the picker (grid or search row) and choose **Edit Descri
 - The colon-shortcut monitor uses a system-wide keyboard event tap, but keystrokes are examined **in memory only** — never logged, stored, or transmitted. At most the current `:shortcode` fragment (ASCII) is held, and it is discarded the moment you switch apps, press a modifier combo, or the pattern dies.
 - Password fields (secure input) and apps on your exclusion list are skipped, and a replacement only happens after EmoPic verifies the selected text matches exactly what you typed.
 
-Planned (see [docs/NEXT_STEPS_PLAN.md](docs/NEXT_STEPS_PLAN.md)):
+Planned:
 - `↑/↓` - Navigate picker results
 - `Enter/Tab` - Insert selected emoji
 - `Escape` - Close picker

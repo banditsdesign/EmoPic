@@ -7,3 +7,9 @@ DerivedData/
 
 # Build artifacts
 *.dmg
+
+# Local-only planning / review notes (not published)
+/docs/
+
+# Local agent tooling (vendored apple-hig skill)
+/.dsh/
