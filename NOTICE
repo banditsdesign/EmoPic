@@ -1,0 +1,19 @@
+EmoPic
+Copyright (c) 2026 Nick Tan
+Licensed under the MIT License (see LICENSE).
+
+This product bundles third-party data:
+
+Emoji metadata — emoji-data
+  https://github.com/iamcal/emoji-data
+  Copyright (c) 2013 Cal Henderson
+  Licensed under the MIT License.
+
+  Bundled as EmoPic/Resources/emoji-data.json: emoji names, shortcodes, Unicode
+  codepoints, categories, sort order and skin-tone variation mappings.
+
+  Only that JSON metadata is included. No sprite sheets or image files from
+  emoji-data are redistributed with EmoPic — emoji are rendered as text using the
+  fonts already installed on your Mac (Apple Color Emoji on macOS), which remain
+  subject to Apple's own terms. Some emoji-text fields and vendor codepoint
+  mappings in the metadata reference image sets we do not ship.
