@@ -29,7 +29,7 @@
 	<key>NSAccessibilityUsageDescription</key>
 	<string>EmoPic needs accessibility access to insert emoji into text fields in other apps.</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>MIT License</string>
+	<string>Copyright © 2026 Nick Tan. MIT License.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

@@ -7,7 +7,7 @@ final class FrequentEmojiStore: ObservableObject {
 
     /// id → rank (0 = most recent). Precomputed once per recents change
     /// instead of being rebuilt inside EmojiDataManager's suggestion query
-    /// on every keystroke (docs/CODE_REVIEW_2026-10-12.md O1/O4).
+    /// on every keystroke (2026-10-12 code review, O1/O4).
     private(set) var rankByID: [String: Int] = [:]
 
     func update() {

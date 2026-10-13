@@ -14,7 +14,7 @@ final class EmojiDataManager: ObservableObject {
 
     /// All alias keys, sorted once at load. The suggestion query finds its
     /// hits as one contiguous run via a binary search instead of filtering
-    /// and sorting every key on each keystroke (docs/CODE_REVIEW_2026-10-12.md O1).
+    /// and sorting every key on each keystroke (2026-10-12 code review, O1).
     private var sortedAliases: [String] = []
 
     /// id → item, plus emoji → item (recents may be recorded as either
@@ -75,7 +75,7 @@ final class EmojiDataManager: ObservableObject {
     /// Hot path: runs once per keystroke inside the event tap, so all heavy
     /// structures (sorted alias index, lowercase search fields, recency
     /// ranks) are precomputed and the query itself is a binary search plus a
-    /// small sort (docs/CODE_REVIEW_2026-10-12.md O1).
+    /// small sort (2026-10-12 code review, O1).
     func suggestions(forPrefix prefix: String, limit: Int = 8) -> [EmojiSuggestion] {
         let q = prefix.lowercased()
         guard !q.isEmpty else { return [] }
@@ -141,7 +141,7 @@ final class EmojiDataManager: ObservableObject {
 
     /// Loads the dataset fully offline: bundled JSON first, then a legacy
     /// on-disk cache from the era when the app downloaded the dataset at
-    /// runtime (that path was removed — see docs/CODE_REVIEW_2026-10-12.md
+    /// runtime (that path was removed — see the 2026-10-12 code review,
     /// S1: the app should trust nothing but its own signed bundle).
     /// If both are missing the UI starts empty rather than fetching anything.
     func loadEmojiData() {
