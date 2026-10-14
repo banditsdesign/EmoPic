@@ -284,9 +284,47 @@ if [[ "$VISIBILITY" != "PRIVATE" ]] && (( ! DRY )); then
   else
     warn "appcast at $EXPECTED_FEED does not list $TAG yet — raw.githubusercontent.com caches for ~5 min, retry shortly"
   fi
-  "$SPARKLE_BIN/sign_update" --verify "$ZIP" >/dev/null 2>&1 \
-    && info "EdDSA signature verifies on $(basename "$ZIP")" \
-    || warn "sign_update --verify failed — investigate before closing issue #2"
+  # The asset users actually download must be the artifact we signed and
+  # notarized, byte for byte — a truncated or mis-uploaded asset is otherwise
+  # invisible until someone's update fails.
+  ENC_URL="$(grep -o 'url="[^"]*\.zip"' "$APPCAST" | sed -n '1p' | sed 's/^url="//; s/"$//')"
+  if [[ -n "$ENC_URL" ]]; then
+    remote_sha="$(curl -fsSL "$ENC_URL" | shasum -a 256 | cut -d' ' -f1)"
+    local_sha="$(shasum -a 256 "$ZIP" | cut -d' ' -f1)"
+    if [[ -n "$remote_sha" && "$remote_sha" == "$local_sha" ]]; then
+      info "downloaded zip is byte-identical to the signed local build"
+    else
+      fail "downloaded zip differs from local build (remote=${remote_sha:-none} local=$local_sha)"
+    fi
+  fi
+
+  # sign_update --verify needs the signature passed explicitly (it does not read
+  # the appcast), and prints nothing on success — exit status is the signal.
+  SIG="$(grep -o 'sparkle:edSignature="[^"]*"' "$APPCAST" | sed -n '1p' | sed 's/^[^"]*"//; s/"$//')"
+  [[ -n "$SIG" ]] || fail "no sparkle:edSignature found in the generated appcast"
+  if "$SPARKLE_BIN/sign_update" --verify "$ZIP" "$SIG" >/dev/null 2>&1; then
+    info "EdDSA signature verifies on $(basename "$ZIP")"
+  else
+    fail "EdDSA verification FAILED — every client would reject this update. Do not ship it."
+  fi
+
+  # spctl cannot assess a bare .dmg ("Insufficient Context"); the definitive
+  # Gatekeeper check is the app inside it.
+  MNT="$OUT/mnt"
+  rm -rf "$MNT"; mkdir -p "$MNT"
+  if hdiutil attach "$DMG" -nobrowse -readonly -mountpoint "$MNT" >/dev/null 2>&1; then
+    if spctl --assess --type execute -vvv "$MNT/EmoPic.app" 2>&1 | grep -q "accepted"; then
+      info "Gatekeeper accepts the app inside the DMG (notarized + stapled)"
+    else
+      warn "Gatekeeper did not accept the app inside the DMG — check before announcing"
+      spctl --assess --type execute -vvv "$MNT/EmoPic.app" 2>&1 | sed 's/^/        /' >&2
+    fi
+    built="$(plutil -extract CFBundleShortVersionString raw "$MNT/EmoPic.app/Contents/Info.plist")"
+    [[ "$built" == "$VERSION" ]] || fail "DMG contains EmoPic $built, not $VERSION"
+    hdiutil detach "$MNT" -quiet
+  else
+    warn "could not mount $DMG for the Gatekeeper check"
+  fi
 fi
 
 step "Done"
