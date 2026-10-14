@@ -52,6 +52,12 @@ final class SettingsWindow {
             item.image = NSImage(systemSymbolName: tab.icon, accessibilityDescription: tab.rawValue)
 
             let hosting = NSHostingController(rootView: tab.paneView())
+            // Give the child VC a real title. In `.toolbar` style, AppKit drives
+            // `window.title` from the selected item's *view-controller* title on
+            // every selection; left empty it blanks the window to "Untitled".
+            // (The tab `label` shows in the toolbar; the window title tracks the
+            // VC title — so this is what actually keeps it titled.)
+            hosting.title = SettingsWindow.windowTitle
             // Identical fixed size everywhere: switching panes never
             // resizes or shifts the window ("panes fit their content").
             hosting.preferredContentSize = SettingsTab.paneSize
@@ -60,7 +66,7 @@ final class SettingsWindow {
             controller.addTabViewItem(item)
         }
 
-        let window = NSWindow(contentViewController: controller)
+        let window = FixedTitleWindow(contentViewController: controller)
         // .titled + .closable only: minimize/zoom stay dimmed — every pane
         // is the same fixed size (settings.md).
         window.styleMask = [.titled, .closable]
@@ -126,5 +132,16 @@ private final class SettingsTabViewController: NSTabViewController {
         // Belt-and-suspenders: the first toolbar-driven title write can land
         // after selection during the window's initial layout pass.
         view.window?.title = SettingsWindow.windowTitle
+    }
+}
+
+/// Window that refuses to be titled "Untitled": any attempt to set an empty
+/// title (what AppKit's toolbar-tab machinery does when it loses the pane
+/// name) is coerced back to our pinned title. This is timing-proof — it holds
+/// whether the blank write happens during selection, layout, or a later pass.
+private final class FixedTitleWindow: NSWindow {
+    override var title: String {
+        get { super.title }
+        set { super.title = newValue.isEmpty ? SettingsWindow.windowTitle : newValue }
     }
 }
