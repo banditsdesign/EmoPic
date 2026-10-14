@@ -7,6 +7,8 @@ DerivedData/
 
 # Build artifacts
 *.dmg
+# Sparkle's update archive, produced next to the DMG by scripts/release.sh
+*.zip
 
 # Local-only planning / review notes (not published)
 /docs/
