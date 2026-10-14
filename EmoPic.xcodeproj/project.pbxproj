@@ -43,6 +43,7 @@
 		B000BF4 /* ColonBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R4 /* ColonBufferTests.swift */; };
 		B000BF5 /* ColonSuggestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R5 /* ColonSuggestionTests.swift */; };
 		B000BF6 /* CustomDescriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R6 /* CustomDescriptionTests.swift */; };
+		B000BF7 /* AXTextInserterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R7 /* AXTextInserterTests.swift */; };
 		E05A6773000860F526361C44 /* UpdateSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -95,6 +96,7 @@
 		B000R4 /* ColonBufferTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonBufferTests.swift; sourceTree = "<group>"; };
 		B000R5 /* ColonSuggestionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonSuggestionTests.swift; sourceTree = "<group>"; };
 		B000R6 /* CustomDescriptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomDescriptionTests.swift; sourceTree = "<group>"; };
+		B000R7 /* AXTextInserterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AXTextInserterTests.swift; sourceTree = "<group>"; };
 		F861146E34E6E86902F53F69 /* PickerSelectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PickerSelectionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -254,6 +256,7 @@
 				B000R4 /* ColonBufferTests.swift */,
 				B000R5 /* ColonSuggestionTests.swift */,
 				B000R6 /* CustomDescriptionTests.swift */,
+				B000R7 /* AXTextInserterTests.swift */,
 				06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */,
 				F861146E34E6E86902F53F69 /* PickerSelectionTests.swift */,
 			);
@@ -403,6 +406,7 @@
 				B000BF4 /* ColonBufferTests.swift in Sources */,
 				B000BF5 /* ColonSuggestionTests.swift in Sources */,
 				B000BF6 /* CustomDescriptionTests.swift in Sources */,
+				B000BF7 /* AXTextInserterTests.swift in Sources */,
 				E05A6773000860F526361C44 /* UpdateSettingsTests.swift in Sources */,
 				60D1E8F5D90CA7A8C61BD597 /* PickerSelectionTests.swift in Sources */,
 			);

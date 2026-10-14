@@ -19,13 +19,20 @@ import SwiftUI
 final class SettingsWindow {
     static let shared = SettingsWindow()
 
+    /// The one title the window ever shows. Pinned because `NSTabViewController`
+    /// in `.toolbar` style rewrites `window.title` from the selected item on
+    /// every click — and it reads the child `NSHostingController.title` (empty),
+    /// not the tab's `label`, so it blanks to "Untitled". We reassert this on
+    /// each selection (see `SettingsTabViewController`) and on every `show()`.
+    static let windowTitle = "Settings"
+
     private var window: NSWindow?
     private var tabController: SettingsTabViewController?
 
     func show() {
         if window == nil { build() }
         NSApp.activate(ignoringOtherApps: true)
-        window?.title = "Settings"   // reassert: some AppKit phase blanked it
+        window?.title = SettingsWindow.windowTitle   // reassert: some AppKit phase blanked it
         window?.makeKeyAndOrderFront(nil)
     }
 
@@ -77,9 +84,9 @@ final class SettingsWindow {
 
         // Title: plain "Settings" (matches the ⌘, menu item people read).
         // Per-pane titling was unreliable in this assembly — the title kept
-        // reverting to "Untitled" — so pin one honest title and reassert it
-        // whenever the window appears, whatever AppKit does in between.
-        window.title = "Settings"
+        // reverting to "Untitled" — so pin one honest title and reassert it on
+        // every tab selection and window appearance, whatever AppKit does.
+        window.title = SettingsWindow.windowTitle
         window.titleVisibility = .visible
         controller.onTabChange = { paneTitle in
             AppSettings.shared.settingsTab = paneTitle
@@ -105,7 +112,19 @@ private final class SettingsTabViewController: NSTabViewController {
 
     override func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
         super.tabView(tabView, didSelect: tabViewItem)
+        // `super` just rewrote the window title from the selected item's (empty)
+        // view-controller title, blanking it to "Untitled". Restore our pinned
+        // title synchronously — this runs on the initial selection and every
+        // subsequent click, so the title can never stick as "Untitled".
+        view.window?.title = SettingsWindow.windowTitle
         guard let id = tabViewItem?.identifier as? String else { return }
         onTabChange?(id)
+    }
+
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        // Belt-and-suspenders: the first toolbar-driven title write can land
+        // after selection during the window's initial layout pass.
+        view.window?.title = SettingsWindow.windowTitle
     }
 }

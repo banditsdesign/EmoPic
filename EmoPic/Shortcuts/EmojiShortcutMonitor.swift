@@ -3,13 +3,20 @@
 // them with the corresponding emoji, system-wide.
 //
 // Architecture (M3 rewrite of the old app-local NSEvent monitor):
-// - A session CGEventTap observes keyDown events. Printable characters are
-//   NEVER suppressed while buffering — ":name:" types through normally.
-//   On confirm (closing ":" / space / tab / return) the already-typed
-//   pattern is swapped for the emoji via AXTextInserter.replaceBeforeCaret.
-//   If the Accessibility write fails, the terminator keystroke passes
-//   through untouched — zero dropped characters, worst case the literal
-//   ":name:" stays visible.
+// - A session CGEventTap observes keyDown events (plus mouse-downs, used
+//   only to abort buffering when the caret may have moved). Printable
+//   characters are NEVER suppressed while buffering — ":name:" types
+//   through normally. On confirm (closing ":" / space / tab / return) the
+//   already-typed pattern is swapped for the emoji with synthetic backspaces
+//   + a clipboard ⌘V paste (AccessibilityInjector
+//   .replaceBeforeCaretViaKeystrokes), NOT an AX write. An AX
+//   `AXSelectedText` write is silently accepted-but-ignored by some apps
+//   (Messages/Pages/Word), whereas every app honors a real paste — so paste is
+//   the reliable path. Only the terminator keystroke is swallowed, and only when
+//   the replacement actually posts; the buffer is flushed first so injected
+//   backspaces never re-enter it. What to delete is trusted from the buffer
+//   (flushed on every click/arrow/shortcut/app-switch), and the sole hard
+//   block is a secure field — worst case the literal ":name:" stays visible.
 // - Never calls NSWorkspace or AppKit-inspecting APIs per keystroke:
 //   frontmost app state is cached from activation notifications.
 // - The tap runs on the main run loop, so all buffer state is
@@ -21,9 +28,12 @@
 
 import Cocoa
 import ApplicationServices
+import os
 
 final class EmojiShortcutMonitor: ObservableObject {
     static let shared = EmojiShortcutMonitor()
+
+    private static let log = Logger(subsystem: "net.emopic.app", category: "ColonShortcuts")
 
     /// Surfaced in the menu-bar panel (T10): shows a hint row while false.
     @Published private(set) var isAccessibilityGranted = false
@@ -83,7 +93,15 @@ final class EmojiShortcutMonitor: ObservableObject {
             return
         }
 
-        let mask = CGEventMask(1 << CGEventType.keyDown.rawValue)
+        // keyDown drives the buffer; mouse-downs are observed ONLY to abort
+        // mid-word buffering — a click can move the caret out from under us,
+        // and the keystroke fallback must never delete characters we can no
+        // longer account for.
+        let mask = CGEventMask(
+            (1 << CGEventType.keyDown.rawValue) |
+            (1 << CGEventType.leftMouseDown.rawValue) |
+            (1 << CGEventType.rightMouseDown.rawValue)
+        )
         guard let tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
@@ -213,6 +231,24 @@ final class EmojiShortcutMonitor: ObservableObject {
             return nil
         }
 
+        // A click anywhere (outside our popup) can move the caret to a place
+        // we're not tracking — abort buffering so a later keystroke fallback
+        // can only ever delete text we typed ourselves. Clicks ON the popup
+        // are row selections and must leave the buffer alive for
+        // insertPicked. Mouse events otherwise pass through untouched.
+        if type == .leftMouseDown || type == .rightMouseDown {
+            let panel = ColonSuggestionPanel.shared
+            // CGEvent.location is top-left origin; NSWindow.frame is
+            // bottom-left. Flip against the primary display height so the
+            // popup-containment test uses a single coordinate space.
+            let primaryHeight = NSScreen.screens.first?.frame.height ?? 0
+            let p = CGPoint(x: event.location.x, y: primaryHeight - event.location.y)
+            if !(panel.isVisible && panel.frame.contains(p)) {
+                flush()
+            }
+            return Unmanaged.passUnretained(event)
+        }
+
         guard type == .keyDown else { return Unmanaged.passUnretained(event) }
         guard AppSettings.shared.enableColonShortcuts else { flush(); return Unmanaged.passUnretained(event) }
 
@@ -310,6 +346,37 @@ final class EmojiShortcutMonitor: ObservableObject {
 
     // MARK: - Replacement
 
+    /// Swap the typed `:name` (plus its terminator) for `emoji` at the caret.
+    ///
+    /// Mechanism: delete the trigger with backspaces and insert the emoji via
+    /// clipboard ⌘V (`AccessibilityInjector.replaceBeforeCaretViaKeystrokes`).
+    /// Some apps (Messages) silently accept an `AXSelectedText` write and then
+    /// ignore it, and others (Word) ignore synthetic Unicode keystroke payloads,
+    /// yet every app honors a real paste — so pasting is what makes substitution
+    /// work across Messages, Pages and Word rather than writing through AX.
+    ///
+    /// Safety: the colon buffer is the authority on what to delete. It only
+    /// reaches this point intact because the tap flushes on every click, arrow
+    /// key, modifier shortcut and app switch since the pattern was typed, so the
+    /// caret is provably still after the `:name` we watched the user type. The
+    /// one hard-block is a secure field (`AXTextInserter.replaceSafety`), where
+    /// deleting would destroy characters. Returns true when the emoji landed and
+    /// the caller should swallow the terminator; false leaves text and keystroke
+    /// untouched.
+    @discardableResult
+    private func swap(replaceCount: Int, with text: String) -> Bool {
+        if AXTextInserter.replaceSafety(at: frontmostPID) == .secure {
+            Self.log.debug("colon: focused field is secure — leaving text untouched")
+            return false
+        }
+        if AccessibilityInjector.replaceBeforeCaretViaKeystrokes(count: replaceCount, with: text, at: frontmostPID) {
+            return true
+        }
+        // Couldn't post (target lost focus mid-keystroke) — pass the
+        // terminator through so nothing is swallowed or dropped.
+        return false
+    }
+
     private func confirm(name: String, replaceCount: Int, trailingSpace: Bool, event: CGEvent) -> Unmanaged<CGEvent>? {
         let panel = ColonSuggestionPanel.shared
 
@@ -330,13 +397,10 @@ final class EmojiShortcutMonitor: ObservableObject {
 
         let finalEmoji = Self.applySkinTone(to: emoji)
         let replacement = finalEmoji.emoji + (trailingSpace ? " " : "")
-        let success = AXTextInserter.replaceBeforeCaret(
-            count: replaceCount, with: replacement, at: frontmostPID,
-            expected: ":" + name
-        )
-
+        // Flush before the keystroke fallback posts synthetic events, so the
+        // backspaces we inject are never read back into the buffer.
         flush()
-        if success {
+        if swap(replaceCount: replaceCount, with: replacement) {
             FrequentEmojiStore.shared.record(finalEmoji)
             return nil // swallow the terminator; the typed pattern was already swapped
         }
@@ -347,19 +411,16 @@ final class EmojiShortcutMonitor: ObservableObject {
     /// replacing the typed `:name` (the Enter/Tab keystroke itself is
     /// swallowed so no newline lands in the document).
     private func pickSelected(trailingSpace: Bool, event: CGEvent) -> Unmanaged<CGEvent>? {
-        defer { flush() }
-
         guard let suggestion = ColonSuggestionPanel.shared.selected else {
+            flush()
             return Unmanaged.passUnretained(event)
         }
         let finalEmoji = Self.applySkinTone(to: suggestion.emoji)
         let replacement = finalEmoji.emoji + (trailingSpace ? " " : "")
         let typedCount = buffer.name.utf16.count + 1 // ":name" before the caret
+        flush() // before any synthetic keystrokes are posted — see confirm()
 
-        if AXTextInserter.replaceBeforeCaret(
-            count: typedCount, with: replacement, at: frontmostPID,
-            expected: ":" + buffer.name
-        ) {
+        if swap(replaceCount: typedCount, with: replacement) {
             FrequentEmojiStore.shared.record(finalEmoji)
             return nil
         }
@@ -369,15 +430,13 @@ final class EmojiShortcutMonitor: ObservableObject {
     /// Mouse-click on a popup row. The panel is non-activating, so the
     /// target app still holds focus and the caret is where we left it.
     private func insertPicked(_ suggestion: EmojiSuggestion) {
-        defer { flush() }
         guard buffer.isActive, frontmostPID > 0 else { return }
 
         let finalEmoji = Self.applySkinTone(to: suggestion.emoji)
         let typedCount = buffer.name.utf16.count + 1
-        if AXTextInserter.replaceBeforeCaret(
-            count: typedCount, with: finalEmoji.emoji, at: frontmostPID,
-            expected: ":" + buffer.name
-        ) {
+        flush() // before any synthetic keystrokes are posted — see confirm()
+
+        if swap(replaceCount: typedCount, with: finalEmoji.emoji) {
             FrequentEmojiStore.shared.record(finalEmoji)
         }
     }

@@ -1,9 +1,12 @@
 // AccessibilityInjector.swift
-// Inserts emoji into other apps. Strategy:
-//   1. Accessibility API (AXTextInserter) — writes straight into the target's
-//      focused text element, never touching the clipboard.
-//   2. Clipboard fallback — writes the emoji, posts ⌘V, then restores the
-//      user's original clipboard contents.
+// Inserts emoji into other apps. The mechanism is a clipboard ⌘V (write the
+// emoji, post ⌘V, restore the user's original clipboard) — the one insertion
+// path every app honors. We deliberately avoid writing text via the Accessibility
+// API or typing a Unicode keystroke payload, because those are ignored by
+// exactly the apps that matter (Messages drops an `AXSelectedText`
+// write; Word ignores Unicode key events). The Accessibility API is used only
+// for reading (popup caret position, before-the-caret verification) via
+// AXTextInserter. Requires Accessibility permission for the ⌘V keystroke.
 
 import Cocoa
 import ApplicationServices
@@ -13,20 +16,15 @@ struct AccessibilityInjector {
     static var isTrusted: Bool { AXIsProcessTrusted() }
 
     /// Insert an emoji into the app running as `pid` (captured before the
-    /// picker stole focus). Falls back to clipboard paste when the target
-    /// exposes no writable AX text element. The fallback verifies the
-    /// intended app actually holds focus before firing the synthetic ⌘V
-    /// (see `pasteboardInsert`).
+    /// picker stole focus) via clipboard paste. `pasteboardInsert` verifies the
+    /// intended app actually holds focus before firing the synthetic ⌘V, so a
+    /// slow focus restore or a mid-flow ⌘-tab can't drop the emoji into the
+    /// wrong app.
     static func insert(_ emoji: EmojiItem, into pid: pid_t?) {
         guard isTrusted else {
             showAccessibilityPrompt()
             return
         }
-
-        if let pid, AXTextInserter.insert(emoji.emoji, at: pid) {
-            return
-        }
-
         pasteboardInsert(emoji.emoji, intendedPID: pid)
     }
 
@@ -41,6 +39,67 @@ struct AccessibilityInjector {
         guard let app = NSWorkspace.shared.frontmostApplication else { return nil }
         if app.bundleIdentifier == Bundle.main.bundleIdentifier { return nil }
         return app.processIdentifier
+    }
+
+    // MARK: - Keystroke replacement (colon-shortcut fallback)
+
+    /// Delete `count` characters before the caret and insert `text` using
+    /// synthetic keystrokes and the clipboard — NOT AX writes and NOT Unicode
+    /// keystroke payloads. Some apps silently ignore the latter two while every
+    /// app honors a paste — Messages accepts an `AXSelectedText` write and
+    /// drops it, Word ignores Unicode-payload key events — so backspacing the
+    /// trigger and pasting with ⌘V is what makes substitution work across
+    /// Messages, Pages and Word.
+    ///
+    /// Callers MUST gate this so it never fires over text they did not type:
+    /// an intact colon buffer (flushed on every click/arrow/shortcut/app-switch
+    /// since the pattern) plus a non-secure focused field
+    /// (`AXTextInserter.replaceSafety`). This deletes without re-reading the
+    /// field. Backspaces and the paste are posted to the same HID stream so they
+    /// arrive in order; the clipboard is restored afterwards (see `pasteNow`).
+    /// Returns false when nothing could be posted (wrong frontmost app,
+    /// untrusted, etc.) so callers can pass the keystroke through untouched.
+    @discardableResult
+    static func replaceBeforeCaretViaKeystrokes(count: Int, with text: String, at pid: pid_t) -> Bool {
+        guard count > 0, count <= 64, !text.isEmpty else { return false }
+        // Only ever fire while the verified target is actually frontmost.
+        guard let frontmost = NSWorkspace.shared.frontmostApplication,
+              frontmost.processIdentifier == pid,
+              frontmost.bundleIdentifier != Bundle.main.bundleIdentifier else { return false }
+        guard isTrusted else { return false }
+
+        guard let source = CGEventSource(stateID: .combinedSessionState) else { return false }
+        let deleteKey: CGKeyCode = 51
+        for _ in 0..<count {
+            guard let down = CGEvent(keyboardEventSource: source, virtualKey: deleteKey, keyDown: true),
+                  let up = CGEvent(keyboardEventSource: source, virtualKey: deleteKey, keyDown: false) else { continue }
+            down.post(tap: .cghidEventTap)
+            up.post(tap: .cghidEventTap)
+        }
+
+        // Paste regardless of length: ⌘V is the one insertion path every target
+        // honors, so it also covers ZWJ families, flags and skin-tone sequences
+        // that overflow the 4-unit Unicode keystroke payload.
+        pasteNow(text)
+        return true
+    }
+
+    /// Clipboard ⌘V paste for an app that already holds focus (unlike
+    /// `pasteboardInsert`, no focus-settle delay — the colon flow never left
+    /// the target app). Clipboard is restored 0.4 s later if untouched.
+    private static func pasteNow(_ text: String) {
+        let pasteboard = NSPasteboard.general
+        let snapshot = ClipboardSnapshot(pasteboard: pasteboard)
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        let ourChangeCount = pasteboard.changeCount
+
+        pasteWithCommandV()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            guard pasteboard.changeCount == ourChangeCount else { return }
+            snapshot.restore(to: pasteboard)
+        }
     }
 
     // MARK: - Clipboard fallback (with save/restore)
