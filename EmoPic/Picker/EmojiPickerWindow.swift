@@ -45,7 +45,9 @@ final class EmojiPickerWindow {
                 self?.insert(emoji)
                 self?.close()
             },
-            presentSkinTone: { _ in }
+            presentSkinTone: { _ in },
+            // Escape closes the picker (the view clears the search field first).
+            onDismiss: { [weak self] in self?.close() }
         ))
         hosted.translatesAutoresizingMaskIntoConstraints = false
         window?.contentView = hosted

@@ -23,11 +23,18 @@ struct EmojiPickerView: View {
     /// the picker level — per-cell sheets would race with the tone popovers.
     @State private var editingEmoji: EmojiItem?
 
+    /// Which result the keyboard is pointing at. Kept out of this view as its
+    /// own object so the movement rules are unit-testable; the view decides what
+    /// is visible and what a pick means.
+    @StateObject private var selection = PickerSelectionModel()
+
     /// Single pick path for every tab (grid cells and search rows), so a
     /// click behaves identically everywhere ("Keep visual and interaction
     /// behavior consistent" — apple-hig design-principles.md Familiarity).
     /// Tone-capable emoji open the chooser anchored to the source; `fromSearch`
     /// keys the popover to the clicked list row instead of the grid cell.
+    /// Keyboard confirms route through here too, so Enter inserts exactly what a
+    /// click would.
     private func handlePick(_ emoji: EmojiItem, fromSearch: Bool = false) {
         if emoji.supportsSkinTone {
             if fromSearch {
@@ -42,12 +49,86 @@ struct EmojiPickerView: View {
         }
     }
 
-    enum SearchMode {
+    enum SearchMode: Equatable {
         case search, category, frequent
     }
 
     var onSelect: (EmojiItem) -> Void
     var presentSkinTone: (EmojiItem) -> Void
+    /// Escape with nothing left to clear. Supplied by the window; defaulted so
+    /// the view stays usable wherever it is embedded.
+    var onDismiss: () -> Void = {}
+
+    // MARK: - Keyboard navigation
+    //
+    // Exactly one list is on screen at a time, so one selection model covers all
+    // three modes — the grid, the two-column Frequent grid and the search list
+    // are the same problem with different widths.
+
+    /// The visible results, in the order the user sees them.
+    private var visibleEmojis: [EmojiItem] {
+        switch searchMode {
+        case .frequent:
+            return FrequentEmojiStore.shared.items
+        case .category:
+            return dataManager.emojis(in: selectedCategory)
+        case .search:
+            return query.isEmpty
+                ? dataManager.emojis(in: .smileys)
+                : dataManager.search(query, first: 50)
+        }
+    }
+
+    /// Columns in the visible layout. Vertical arrows step a whole row in a grid
+    /// and a single item in the one-column search list.
+    private var columnCount: Int {
+        switch searchMode {
+        case .search: return 1
+        case .frequent: return 2
+        case .category: return 4
+        }
+    }
+
+    private var visibleIDs: [String] { visibleEmojis.map(\.id) }
+
+    private var highlightedEmoji: EmojiItem? {
+        guard let id = selection.selectedID else { return nil }
+        return visibleEmojis.first { $0.id == id }
+    }
+
+    /// While a sheet or the skin-tone popover is up, the keyboard belongs to it:
+    /// Return/Cancel and the arrow keys must reach the presented UI, not move the
+    /// list behind it.
+    private var keyboardNavBlocked: Bool {
+        skinToneSourceID != nil || searchSkinToneID != nil || editingEmoji != nil
+    }
+
+    @discardableResult
+    private func handleKeyEvent(_ event: NSEvent) -> Bool {
+        guard !keyboardNavBlocked else { return false }
+        let key = PickerKeyMapper.key(code: event.keyCode, modifiers: event.modifierFlags)
+        switch key {
+        case .ignored:
+            return false
+        case .dismiss:
+            // macOS convention: Escape clears the search field first and only
+            // closes the picker when there is nothing left to undo.
+            if !query.isEmpty {
+                query = ""
+                return true
+            }
+            onDismiss()
+            return true
+        case .confirm:
+            guard let emoji = highlightedEmoji else { return false }
+            handlePick(emoji, fromSearch: searchMode == .search)
+            return true
+        default:
+            selection.verticalStride = columnCount
+            selection.move(key)
+            return true
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -64,7 +145,7 @@ struct EmojiPickerView: View {
             .pickerStyle(.segmented)
             .padding(.horizontal)
             .padding(.top, 8)
-            .onChange(of: settings.showFrequentInPicker) { visible in
+            .onChange(of: settings.showFrequentInPicker) { _, visible in
                 if !visible && searchMode == .frequent {
                     searchMode = .search
                 }
@@ -91,6 +172,17 @@ struct EmojiPickerView: View {
             }
         }
         .frame(width: 360, height: 420)
+        .background(PickerKeyCatcher(isEnabled: !keyboardNavBlocked, onKey: handleKeyEvent))
+        // Keep the model's view of the list in step with what's on screen: new
+        // ids when the results change, and the right row width when the mode does.
+        .onChange(of: visibleIDs) {
+            selection.verticalStride = columnCount
+            selection.update(visibleIDs)
+        }
+        .onChange(of: searchMode) {
+            selection.verticalStride = columnCount
+            selection.update(visibleIDs)
+        }
         .sheet(
             isPresented: Binding(
                 get: { editingEmoji != nil },
@@ -106,14 +198,23 @@ struct EmojiPickerView: View {
     // MARK: - Frequent view
     private var frequentView: some View {
         let frequent = FrequentEmojiStore.shared
-        return ScrollView {
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
-                ForEach(frequent.items) { emoji in
-                    emojiCell(emoji)
+        return ScrollViewReader { proxy in
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
+                    ForEach(frequent.items) { emoji in
+                        emojiCell(emoji)
+                    }
                 }
+                .padding()
             }
-            .padding()
+            .onChange(of: selection.selectedID) { scrollToSelection(proxy) }
         }
+    }
+
+    /// Keeps the keyboard-highlighted cell on screen as the arrows walk the list.
+    private func scrollToSelection(_ proxy: ScrollViewProxy) {
+        guard let id = selection.selectedID else { return }
+        withAnimation(.easeOut(duration: 0.12)) { proxy.scrollTo(id, anchor: .center) }
     }
 
     // MARK: - Category view
@@ -149,13 +250,16 @@ struct EmojiPickerView: View {
 
             Divider()
 
-            ScrollView {
-                let emojis = dataManager.emojis(in: selectedCategory)
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()),
-                                    GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
-                    ForEach(emojis) { emoji in emojiCell(emoji) }
+            ScrollViewReader { proxy in
+                ScrollView {
+                    let emojis = dataManager.emojis(in: selectedCategory)
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()),
+                                        GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
+                        ForEach(emojis) { emoji in emojiCell(emoji) }
+                    }
+                    .padding()
                 }
-                .padding()
+                .onChange(of: selection.selectedID) { scrollToSelection(proxy) }
             }
         }
     }
@@ -171,53 +275,67 @@ struct EmojiPickerView: View {
             ? dataManager.emojis(in: .smileys)
             : dataManager.search(query, first: 50)
 
-        return List(results, id: \.id, selection: $selectedEmoji) { emoji in
-            Button {
-                selectedEmoji = emoji
-                handlePick(emoji, fromSearch: true)
-            } label: {
-                HStack(spacing: 8) {
-                    Text(emoji.emoji)
-                        .font(.system(size: 28))
-                    VStack(alignment: .leading) {
-                        Text(emoji.name)
-                            .font(.subheadline)
-                        Text(emoji.aliases.prefix(3).joined(separator: " · "))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                        // The user's own tag (issue #1), accented so it reads
-                        // as theirs, not part of the built-in metadata.
-                        if !emoji.customDescription.isEmpty {
-                            Text(emoji.customDescription)
+        return ScrollViewReader { proxy in
+            List(results, id: \.id, selection: $selectedEmoji) { emoji in
+                Button {
+                    selectedEmoji = emoji
+                    handlePick(emoji, fromSearch: true)
+                } label: {
+                    HStack(spacing: 8) {
+                        Text(emoji.emoji)
+                            .font(.system(size: 28))
+                        VStack(alignment: .leading) {
+                            Text(emoji.name)
+                                .font(.subheadline)
+                            Text(emoji.aliases.prefix(3).joined(separator: " · "))
                                 .font(.caption)
-                                .foregroundStyle(.tint)
+                                .foregroundStyle(.secondary)
                                 .lineLimit(1)
+                            // The user's own tag (issue #1), accented so it reads
+                            // as theirs, not part of the built-in metadata.
+                            if !emoji.customDescription.isEmpty {
+                                Text(emoji.customDescription)
+                                    .font(.caption)
+                                    .foregroundStyle(.tint)
+                                    .lineLimit(1)
+                            }
                         }
+                        Spacer(minLength: 0)
                     }
-                    Spacer(minLength: 0)
+                    .contentShape(Rectangle()) // whole row is clickable, not just glyphs
+                    .padding(.vertical, 2)
                 }
-                .contentShape(Rectangle()) // whole row is clickable, not just glyphs
-                .padding(.vertical, 2)
+                .buttonStyle(.plain)
+                .help(emoji.displayDescription)
+                .contextMenu {
+                    Button(editingContextTitle(for: emoji)) { editingEmoji = emoji }
+                }
+                .popover(
+                    isPresented: Binding(
+                        get: { searchSkinToneID == emoji.id },
+                        set: { if !$0 { searchSkinToneID = nil } }
+                    ),
+                    attachmentAnchor: .point(.trailing),
+                    arrowEdge: .trailing
+                ) {
+                    skinToneChooser { searchSkinToneID = nil }
+                }
+                // Keyboard highlight as a tinted wash rather than the macOS blue
+                // selection bar: it marks what Enter will insert without hiding
+                // the glyph, and stays visible in both appearances.
+                .listRowBackground(
+                    isHighlighted(emoji) ? Color.accentColor.opacity(0.16) : Color.clear
+                )
             }
-            .buttonStyle(.plain)
-            .help(emoji.displayDescription)
-            .contextMenu {
-                Button(editingContextTitle(for: emoji)) { editingEmoji = emoji }
-            }
-            .popover(
-                isPresented: Binding(
-                    get: { searchSkinToneID == emoji.id },
-                    set: { if !$0 { searchSkinToneID = nil } }
-                ),
-                attachmentAnchor: .point(.trailing),
-                arrowEdge: .trailing
-            ) {
-                skinToneChooser { searchSkinToneID = nil }
-            }
+            .listStyle(.plain)
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .onChange(of: selection.selectedID) { scrollToSelection(proxy) }
         }
-        .listStyle(.plain)
-        .frame(minWidth: 0, maxWidth: .infinity)
+    }
+
+    /// Whether this emoji is the one the keyboard is currently pointing at.
+    private func isHighlighted(_ emoji: EmojiItem) -> Bool {
+        selection.selectedID == emoji.id
     }
 
     // MARK: - Emoji cell
@@ -242,6 +360,12 @@ struct EmojiPickerView: View {
             }
         }
         .buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(isHighlighted(emoji) ? Color.accentColor.opacity(0.18) : Color.clear)
+        )
+        // Explicit view id so ScrollViewReader can follow the keyboard into view.
+        .id(emoji.id)
         .help(emoji.displayDescription)
         .contextMenu {
             Button(editingContextTitle(for: emoji)) { editingEmoji = emoji }

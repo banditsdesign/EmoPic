@@ -7,9 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C2AFCE02010BDCFA74257DF /* PickerKeyCatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59ACF4F4E5DF4073C7258A9B /* PickerKeyCatcher.swift */; };
+		60D1E8F5D90CA7A8C61BD597 /* PickerSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F861146E34E6E86902F53F69 /* PickerSelectionTests.swift */; };
 		66B523B347120B38503A28F7 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 5959A4098B81EA1D95872288 /* Sparkle */; };
 		739CA301307C9CCF002EAF52 /* EmoPic.icon in Resources */ = {isa = PBXBuildFile; fileRef = 739CA300307C9CCF002EAF52 /* EmoPic.icon */; };
 		74D21C86C438D935209C0A46 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C87E0E2EB0966A499F0BC7 /* Updater.swift */; };
+		754A9B59C686FCFA79A0594D /* PickerSelectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A77B376A6E37FF1A150F16 /* PickerSelectionModel.swift */; };
 		A10001 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10010 /* App.swift */; };
 		A10002 /* EmoPic-App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10011 /* EmoPic-App.swift */; };
 		A10003 /* EmojiCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10012 /* EmojiCategory.swift */; };
@@ -56,6 +59,8 @@
 /* Begin PBXFileReference section */
 		06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdateSettingsTests.swift; sourceTree = "<group>"; };
 		41C87E0E2EB0966A499F0BC7 /* Updater.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
+		55A77B376A6E37FF1A150F16 /* PickerSelectionModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PickerSelectionModel.swift; sourceTree = "<group>"; };
+		59ACF4F4E5DF4073C7258A9B /* PickerKeyCatcher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PickerKeyCatcher.swift; sourceTree = "<group>"; };
 		739CA300307C9CCF002EAF52 /* EmoPic.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = EmoPic.icon; sourceTree = "<group>"; };
 		A000102 /* SettingsWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		A000103 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -90,6 +95,7 @@
 		B000R4 /* ColonBufferTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonBufferTests.swift; sourceTree = "<group>"; };
 		B000R5 /* ColonSuggestionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonSuggestionTests.swift; sourceTree = "<group>"; };
 		B000R6 /* CustomDescriptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomDescriptionTests.swift; sourceTree = "<group>"; };
+		F861146E34E6E86902F53F69 /* PickerSelectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PickerSelectionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +166,8 @@
 			children = (
 				A10019 /* EmojiPickerView.swift */,
 				A1001A /* EmojiPickerWindow.swift */,
+				55A77B376A6E37FF1A150F16 /* PickerSelectionModel.swift */,
+				59ACF4F4E5DF4073C7258A9B /* PickerKeyCatcher.swift */,
 			);
 			path = Picker;
 			sourceTree = "<group>";
@@ -247,6 +255,7 @@
 				B000R5 /* ColonSuggestionTests.swift */,
 				B000R6 /* CustomDescriptionTests.swift */,
 				06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */,
+				F861146E34E6E86902F53F69 /* PickerSelectionTests.swift */,
 			);
 			path = EmoPicTests;
 			sourceTree = "<group>";
@@ -379,6 +388,8 @@
 				A10029 /* ColonSuggestionPanel.swift in Sources */,
 				A1002A /* CustomDescriptionStore.swift in Sources */,
 				74D21C86C438D935209C0A46 /* Updater.swift in Sources */,
+				754A9B59C686FCFA79A0594D /* PickerSelectionModel.swift in Sources */,
+				0C2AFCE02010BDCFA74257DF /* PickerKeyCatcher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,6 +404,7 @@
 				B000BF5 /* ColonSuggestionTests.swift in Sources */,
 				B000BF6 /* CustomDescriptionTests.swift in Sources */,
 				E05A6773000860F526361C44 /* UpdateSettingsTests.swift in Sources */,
+				60D1E8F5D90CA7A8C61BD597 /* PickerSelectionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

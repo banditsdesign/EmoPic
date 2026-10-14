@@ -12,6 +12,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 - **Launch at Login**: Optional auto-start when you sign in (toggle in Settings)
 - **Auto-Update (optional)**: Check GitHub for a new release weekly — off by default — and install it with one click when you approve. See [PRIVACY.md](PRIVACY.md) for what a check sends
 - **Categories & Search**: Browse by category or search by name/alias
+- **Keyboard Navigable**: `↑`/`↓` to move, `Enter` or `Tab` to insert, `Esc` to back out — the picker needs no mouse
 - **Custom Descriptions**: Right-click any emoji to attach your own words — search and `:colon:` suggestions match them instantly, and your text shows as the emoji's tooltip. Manage them all in Settings → Custom Descriptions
 
 ## How It Works
@@ -30,16 +31,17 @@ Right-click an emoji in the picker (grid or search row) and choose **Edit Descri
 - `⌘,` - Open Settings
 - `⌘Q` - Quit EmoPic
 
+Inside the picker window — the whole thing is usable without a mouse:
+
+- `↑` / `↓` - Move through the results. In the 4-wide category grid vertical keys step a whole row (so you land on the emoji directly below); `←` / `→` step one cell
+- `Enter` or `Tab` - Insert the highlighted emoji. Skin-tone emoji open the tone chooser first, exactly as a click does
+- `Esc` - Clear the search field; press it again with the field empty to close the picker
+
 ### Privacy
 - **No telemetry — and no network unless you ask.** The emoji dataset is bundled inside the signed app bundle. EmoPic makes no connection whatsoever until you turn on *Automatically check for updates* (off by default) or press *Check for Updates…* yourself; then the only traffic is one request to GitHub for the release feed, plus the download if you choose to install. No identifiers, no system information, no analytics.
 - The colon-shortcut monitor uses a system-wide keyboard event tap, but keystrokes are examined **in memory only** — never logged, stored, or transmitted. At most the current `:shortcode` fragment (ASCII) is held, and it is discarded the moment you switch apps, press a modifier combo, or the pattern dies.
 - Password fields (secure input) and apps on your exclusion list are skipped, and a replacement only happens after EmoPic verifies the selected text matches exactly what you typed.
 - Full details — every value EmoPic stores, where it lives, and how to erase it — in [PRIVACY.md](PRIVACY.md).
-
-Planned:
-- `↑/↓` - Navigate picker results
-- `Enter/Tab` - Insert selected emoji
-- `Escape` - Close picker
 
 ## Architecture
 
