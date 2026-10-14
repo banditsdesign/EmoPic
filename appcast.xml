@@ -3,13 +3,13 @@
     <channel>
         <title>EmoPic</title>
         <item>
-            <title>1.0.4</title>
-            <pubDate>Wed, 14 Oct 2026 09:39:21 +0800</pubDate>
-            <link>https://github.com/banditsdesign/EmoPic/releases/tag/v1.0.4</link>
-            <sparkle:version>5</sparkle:version>
-            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+            <title>1.0.5</title>
+            <pubDate>Wed, 14 Oct 2026 10:01:01 +0800</pubDate>
+            <link>https://github.com/banditsdesign/EmoPic/releases/tag/v1.0.5</link>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>1.0.5</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/banditsdesign/EmoPic/releases/download/v1.0.4/EmoPic-1.0.4.zip" length="3737207" type="application/octet-stream" sparkle:edSignature="2g1iRW80S7dyhfNILktShTt3GigW7NH23DMotB0x9QHbLWxFzN2+mOwI1usVoFFCa7KyAikqyvip5pnAT7vmAQ=="/>
+            <enclosure url="https://github.com/banditsdesign/EmoPic/releases/download/v1.0.5/EmoPic-1.0.5.zip" length="3766491" type="application/octet-stream" sparkle:edSignature="6z4tJxqI4/WObeugsbS7/FmyfNvOw5cQm5C0pzpznzfo17E0Z7ykj7TvAzBbruy9trTB8wNZgxi0l63Dgpk5Cg=="/>
         </item>
     </channel>
 </rss>
