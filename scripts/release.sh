@@ -262,18 +262,29 @@ fi
 
 # --------------------------------------------------------------- release -------
 
-step "Publish GitHub release $TAG"
-if [[ -n "$NOTES_FILE" ]]; then
-  run gh release create "$TAG" "$DMG" "$ZIP" --title "EmoPic $VERSION" --notes-file "$NOTES_FILE"
-else
-  run gh release create "$TAG" "$DMG" "$ZIP" --title "EmoPic $VERSION" --generate-notes
-fi
-
+# Commit the feed and push FIRST, then publish. Two hard-won lessons:
+#  1. gh anchors the release tag at the commit remote main is on. If the bump
+#     isn't pushed yet, the tag silently lands on the *previous* release's
+#     commit (the v1.1 drift) — or, with an explicit --target, gh rejects an
+#     unpushed SHA outright. Push first so the target exists on the remote.
+#  2. Never delete-and-recreate a release tag to "fix" it: deleting the tag
+#     GitHub is using flips the release to DRAFT, and re-pushing the tag does
+#     not un-draft it. Getting the tag right the first time (below) avoids it.
 step "Commit appcast.xml to main (this IS the feed)"
 run cp "$APPCAST" "$ROOT/appcast.xml"
 run git add appcast.xml
 run git commit -m "release: $VERSION appcast (issue #2 feed)"
 run git push origin main
+
+step "Publish GitHub release $TAG"
+# --target pins the tag to the bump+appcast commit we just pushed, so it can
+# never drift onto an older commit.
+RELEASE_TARGET="$(git rev-parse HEAD)"
+if [[ -n "$NOTES_FILE" ]]; then
+  run gh release create "$TAG" "$DMG" "$ZIP" --target "$RELEASE_TARGET" --title "EmoPic $VERSION" --notes-file "$NOTES_FILE"
+else
+  run gh release create "$TAG" "$DMG" "$ZIP" --target "$RELEASE_TARGET" --title "EmoPic $VERSION" --generate-notes
+fi
 
 # ------------------------------------------------------------- verify ----------
 
