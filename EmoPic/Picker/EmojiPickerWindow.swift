@@ -61,6 +61,24 @@ final class EmojiPickerWindow {
 
     func close() {
         window?.close()
+        returnFocus()
+    }
+
+    /// Hands keyboard focus back to whatever app was frontmost before the picker
+    /// opened.
+    ///
+    /// `show()` explicitly activates our own app, and closing a window does not
+    /// undo that: with an accessory (LSUIElement) app the previous app is not
+    /// restored automatically, so after an insert you were left staring at an
+    /// inactive desktop and had to ⌘-tab or click back into your document. A
+    /// Spotlight-style picker should land you exactly where you were.
+    private func returnFocus() {
+        guard let app = previousApp,
+              app.bundleIdentifier != Bundle.main.bundleIdentifier,
+              !app.isActive else { return }
+        // macOS 14 wants the app handing focus over to name itself; at this
+        // moment that is us, which is exactly the requirement.
+        app.activate(from: .current, options: [])
     }
 
     private func positionBelowStatusItem() {
