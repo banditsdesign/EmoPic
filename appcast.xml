@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>EmoPic</title>
+        <item>
+            <title>1.0.4</title>
+            <pubDate>Wed, 14 Oct 2026 09:39:21 +0800</pubDate>
+            <link>https://github.com/banditsdesign/EmoPic/releases/tag/v1.0.4</link>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/banditsdesign/EmoPic/releases/download/v1.0.4/EmoPic-1.0.4.zip" length="3737207" type="application/octet-stream" sparkle:edSignature="2g1iRW80S7dyhfNILktShTt3GigW7NH23DMotB0x9QHbLWxFzN2+mOwI1usVoFFCa7KyAikqyvip5pnAT7vmAQ=="/>
+        </item>
+    </channel>
+</rss>
