@@ -310,8 +310,10 @@ if [[ "$VISIBILITY" != "PRIVATE" ]] && (( ! DRY )); then
 
   # spctl cannot assess a bare .dmg ("Insufficient Context"); the definitive
   # Gatekeeper check is the app inside it.
-  MNT="$OUT/mnt"
-  rm -rf "$MNT"; mkdir -p "$MNT"
+  # Mount on the boot volume: hdiutil refuses with "Permission denied" for a
+  # mountpoint under a repository on an external volume (TCC removable-volumes),
+  # which silently disabled this check on the 1.0.5 run.
+  MNT="$(mktemp -d "${TMPDIR:-/tmp}/emopic-gatekeeper.XXXXXX")"
   if hdiutil attach "$DMG" -nobrowse -readonly -mountpoint "$MNT" >/dev/null 2>&1; then
     if spctl --assess --type execute -vvv "$MNT/EmoPic.app" 2>&1 | grep -q "accepted"; then
       info "Gatekeeper accepts the app inside the DMG (notarized + stapled)"
@@ -322,8 +324,10 @@ if [[ "$VISIBILITY" != "PRIVATE" ]] && (( ! DRY )); then
     built="$(plutil -extract CFBundleShortVersionString raw "$MNT/EmoPic.app/Contents/Info.plist")"
     [[ "$built" == "$VERSION" ]] || fail "DMG contains EmoPic $built, not $VERSION"
     hdiutil detach "$MNT" -quiet
+    rm -rf "$MNT"
   else
     warn "could not mount $DMG for the Gatekeeper check"
+    rm -rf "$MNT"
   fi
 fi
 
