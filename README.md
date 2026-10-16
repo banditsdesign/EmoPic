@@ -69,7 +69,7 @@ EmoPic/
 
 Requires Xcode 15+ and macOS 14+ (Sonoma).
 
-Prebuilt: grab `EmoPic-1.0.3.dmg` from the [latest GitHub Release](https://github.com/banditsdesign/EmoPic/releases). Open the disk image and drag EmoPic to Applications. Apple-**notarized**, Developer ID signed, hardened runtime — Gatekeeper accepts it directly. First launch asks for Accessibility access once (for text insertion).
+Prebuilt: grab `EmoPic-1.1.1.dmg` from the [latest GitHub Release](https://github.com/banditsdesign/EmoPic/releases). Open the disk image and drag EmoPic to Applications. Apple-**notarized**, Developer ID signed, hardened runtime — Gatekeeper accepts it directly. First launch asks for Accessibility access once (for text insertion).
 
 ## Security
 
