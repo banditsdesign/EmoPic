@@ -27,14 +27,15 @@
 # store-credentials --keychain-profile EmoPic …`, default profile name EmoPic, override with NOTARY_PROFILE) or the env vars APPLE_ID, APP_SPECIFIC_PASSWORD
 # and TEAM_ID.
 #
-# Sparkle signing key — pick the key that matches SUPublicEDKey, one of:
+# Sparkle signing key — the key must match SUPublicEDKey. In preference order:
 #   SPARKLE_ED_KEY_FILE=~/path/emopic-ed25519.txt   sign from an exported key file
-#   SPARKLE_KEYCHAIN_ACCOUNT=emopic                 sign from a per-project Keychain item
-#   (neither)                                        the shared Keychain item, checked
-#                                                    against SUPublicEDKey up front
+#   SPARKLE_KEYCHAIN_ACCOUNT=<account>              a named Keychain item
+#   (neither)                                        Keychain account 'emopic', then
+#                                                    the shared 'ed25519' one — each
+#                                                    verified against SUPublicEDKey
 # See "Keychain collision" in docs/RELEASE_PROCESS.md: the default Keychain slot
 # is shared by every Sparkle project on the machine, so another app's keygen
-# silently replaces this one's key.
+# silently replaces this one's key. Keep EmoPic on its own 'emopic' account.
 
 set -euo pipefail
 
@@ -153,23 +154,26 @@ if [[ -n "${SPARKLE_ED_KEY_FILE:-}" ]]; then
   [[ -r "$SPARKLE_ED_KEY_FILE" ]] || fail "SPARKLE_ED_KEY_FILE is not readable: $SPARKLE_ED_KEY_FILE"
   ED_KEYS=(--ed-key-file "$SPARKLE_ED_KEY_FILE")
   info "appcast key: key file $SPARKLE_ED_KEY_FILE (Keychain is not used)"
-elif [[ -n "${SPARKLE_KEYCHAIN_ACCOUNT:-}" ]]; then
-  ED_KEYS=(--account "$SPARKLE_KEYCHAIN_ACCOUNT")
-  info "appcast key: Keychain account '$SPARKLE_KEYCHAIN_ACCOUNT'"
 else
-  ED_KEYS=(--account ed25519)
-  KEYCHAIN_PUB="$("$SPARKLE_BIN"/generate_keys -p 2>/dev/null | tail -1)"
-  [[ -n "$KEYCHAIN_PUB" ]] || fail "could not read a Sparkle EdDSA key from the Keychain"
-  if [[ "$KEYCHAIN_PUB" != "$PUBKEY" ]]; then
-    fail "the Keychain's Sparkle key is not this app's.
-      Keychain  $KEYCHAIN_PUB
-      SUPublicEDKey  $PUBKEY
-    The Keychain slot is shared by every Sparkle project on this machine, so a
-    keygen for another app replaced this one. Sign with the matching export
-    (SPARKLE_ED_KEY_FILE=…) or a per-project item (SPARKLE_KEYCHAIN_ACCOUNT=…);
-    docs/RELEASE_PROCESS.md has the inventory and the repair."
+  # Own account first, shared account second. `-p` on a missing account only
+  # errors out, so probing costs nothing and creates nothing.
+  for account in "${SPARKLE_KEYCHAIN_ACCOUNT:-emopic}" ed25519; do
+    pub="$($SPARKLE_BIN/generate_keys --account "$account" -p 2>/dev/null | tail -1)"
+    if [[ -n "$pub" && "$pub" == "$PUBKEY" ]]; then
+      ED_KEYS=(--account "$account")
+      info "appcast key: Keychain account '$account' matches SUPublicEDKey"
+      break
+    fi
+  done
+  if [[ ${#ED_KEYS[@]} -eq 0 ]]; then
+    fail "no Sparkle key in the Keychain matches SUPublicEDKey ($PUBKEY).
+    Repair, once, from this project's export — under its OWN account, so no
+    other app's keygen can replace it:
+      $SPARKLE_BIN/generate_keys --account emopic -f ~/Sparkle-backups/<emopic-ed25519.txt>
+    or sign straight from the file for a single run:
+      SPARKLE_ED_KEY_FILE=<path> scripts/release.sh …
+    Inventory, history and the backup drill: docs/RELEASE_PROCESS.md."
   fi
-  info "appcast key: Keychain item matches SUPublicEDKey"
 fi
 
 if (( ! SKIP_NOTARIZE )); then
