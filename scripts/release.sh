@@ -24,9 +24,17 @@
 # copy on a 404 appcast.
 #
 # Notarization credentials: either a stored profile (`xcrun notarytool
-# store-credentials --keychain-profile EmoPic …`, default profile name EmoPic,
-# override with NOTARY_PROFILE) or the env vars APPLE_ID, APP_SPECIFIC_PASSWORD
+# store-credentials --keychain-profile EmoPic …`, default profile name EmoPic, override with NOTARY_PROFILE) or the env vars APPLE_ID, APP_SPECIFIC_PASSWORD
 # and TEAM_ID.
+#
+# Sparkle signing key — pick the key that matches SUPublicEDKey, one of:
+#   SPARKLE_ED_KEY_FILE=~/path/emopic-ed25519.txt   sign from an exported key file
+#   SPARKLE_KEYCHAIN_ACCOUNT=emopic                 sign from a per-project Keychain item
+#   (neither)                                        the shared Keychain item, checked
+#                                                    against SUPublicEDKey up front
+# See "Keychain collision" in docs/RELEASE_PROCESS.md: the default Keychain slot
+# is shared by every Sparkle project on the machine, so another app's keygen
+# silently replaces this one's key.
 
 set -euo pipefail
 
@@ -132,6 +140,38 @@ SPARKLE_BIN="${SPARKLE_BIN:-$(ls -d "$HOME"/Library/Developer/Xcode/DerivedData/
   || fail "Sparkle CLI tools not found. Build once (xcodebuild -resolvePackageDependencies) or set SPARKLE_BIN."
 info "sparkle tools: $SPARKLE_BIN"
 
+# ---- which Sparkle signing key to use ---------------------------------------
+# Sparkle keeps its EdDSA key in ONE Keychain item per machine: service
+# https://sparkle-project.org, account ed25519. It is not per project, so
+# generating a key for a second Sparkle app overwrites the first one's — which
+# is what happened on 2026-11-07, when a Canionotes keygen replaced EmoPic's
+# key. generate_appcast did not fail: it warned on stderr and wrote an UNSIGNED
+# appcast entry that every installed copy would reject. So name the key here,
+# and when falling back to the shared Keychain item, prove it is ours first.
+ED_KEYS=()
+if [[ -n "${SPARKLE_ED_KEY_FILE:-}" ]]; then
+  [[ -r "$SPARKLE_ED_KEY_FILE" ]] || fail "SPARKLE_ED_KEY_FILE is not readable: $SPARKLE_ED_KEY_FILE"
+  ED_KEYS=(--ed-key-file "$SPARKLE_ED_KEY_FILE")
+  info "appcast key: key file $SPARKLE_ED_KEY_FILE (Keychain is not used)"
+elif [[ -n "${SPARKLE_KEYCHAIN_ACCOUNT:-}" ]]; then
+  ED_KEYS=(--account "$SPARKLE_KEYCHAIN_ACCOUNT")
+  info "appcast key: Keychain account '$SPARKLE_KEYCHAIN_ACCOUNT'"
+else
+  ED_KEYS=(--account ed25519)
+  KEYCHAIN_PUB="$("$SPARKLE_BIN"/generate_keys -p 2>/dev/null | tail -1)"
+  [[ -n "$KEYCHAIN_PUB" ]] || fail "could not read a Sparkle EdDSA key from the Keychain"
+  if [[ "$KEYCHAIN_PUB" != "$PUBKEY" ]]; then
+    fail "the Keychain's Sparkle key is not this app's.
+      Keychain  $KEYCHAIN_PUB
+      SUPublicEDKey  $PUBKEY
+    The Keychain slot is shared by every Sparkle project on this machine, so a
+    keygen for another app replaced this one. Sign with the matching export
+    (SPARKLE_ED_KEY_FILE=…) or a per-project item (SPARKLE_KEYCHAIN_ACCOUNT=…);
+    docs/RELEASE_PROCESS.md has the inventory and the repair."
+  fi
+  info "appcast key: Keychain item matches SUPublicEDKey"
+fi
+
 if (( ! SKIP_NOTARIZE )); then
   if [[ -n "${APPLE_ID:-}" ]]; then
     NOTARY=(--apple-id "$APPLE_ID" --password "${APP_SPECIFIC_PASSWORD:?APP_SPECIFIC_PASSWORD required with APPLE_ID}" --team-id "$TEAM_ID")
@@ -181,7 +221,13 @@ ruby -e '
   project.save
   puts "  #{ARGV[2]}: MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build}"
 ' "$VERSION" "$BUILD" "$PROJECT"
-run git commit -am "chore: bump version to $VERSION (build $BUILD)"
+# Idempotent: a release re-run after a mid-flight failure lands here with the
+# bump already committed, and `git commit` with nothing staged would abort.
+if git diff --quiet -- "$PROJECT"; then
+  info "version already at $VERSION (build $BUILD) — nothing to commit"
+else
+  run git commit -am "chore: bump version to $VERSION (build $BUILD)"
+fi
 
 # ----------------------------------------------------------------- archive -----
 
@@ -250,13 +296,18 @@ step "Sign for Sparkle + regenerate appcast.xml"
 APPCAST_DIR="$OUT/appcast"
 rm -rf "$APPCAST_DIR"; mkdir -p "$APPCAST_DIR"
 cp "$ZIP" "$APPCAST_DIR/"
-run "$SPARKLE_BIN/generate_appcast" \
+run "$SPARKLE_BIN/generate_appcast" "${ED_KEYS[@]}" \
   --download-url-prefix "https://github.com/$OWNER/$REPO/releases/download/$TAG/" \
   --link "https://github.com/$OWNER/$REPO/releases/tag/$TAG" \
-  "$APPCAST_DIR"
+  "$APPCAST_DIR" 2>&1 | tee "$OUT/appcast.log"
 APPCAST="$APPCAST_DIR/appcast.xml"
 if (( ! DRY )); then
   grep -q "$ZIP" "$APPCAST" || fail "appcast does not reference $ZIP"
+  # The key-mismatch warning is only a warning, and the feed it produces is
+  # unsigned — invisible here, fatal on every client. Refuse it.
+  if grep -q "does not match key" "$OUT/appcast.log"; then
+    fail "the Sparkle signing key does not match SUPublicEDKey — the appcast would be unsigned and rejected by every client. See the appcast-key note above and docs/RELEASE_PROCESS.md."
+  fi
   grep -q 'sparkle:edSignature' "$APPCAST" || fail "appcast entry is missing an EdDSA signature"
 fi
 
@@ -313,7 +364,7 @@ if [[ "$VISIBILITY" != "PRIVATE" ]] && (( ! DRY )); then
   # the appcast), and prints nothing on success — exit status is the signal.
   SIG="$(grep -o 'sparkle:edSignature="[^"]*"' "$APPCAST" | sed -n '1p' | sed 's/^[^"]*"//; s/"$//')"
   [[ -n "$SIG" ]] || fail "no sparkle:edSignature found in the generated appcast"
-  if "$SPARKLE_BIN/sign_update" --verify "$ZIP" "$SIG" >/dev/null 2>&1; then
+  if "$SPARKLE_BIN/sign_update" --verify "${ED_KEYS[@]}" "$ZIP" "$SIG" >/dev/null 2>&1; then
     info "EdDSA signature verifies on $(basename "$ZIP")"
   else
     fail "EdDSA verification FAILED — every client would reject this update. Do not ship it."
