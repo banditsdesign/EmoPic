@@ -10,6 +10,7 @@ A free, open-source emoji picker that lives in your menu bar and supports Slack-
 - **Light & Dark Mode**: Automatically follows your system appearance
 - **Frequently Used**: Your most-used emoji rise to the top
 - **Launch at Login**: Optional auto-start when you sign in (toggle in Settings)
+- **One Copy Only**: Opening EmoPic while it is already running brings the running copy's picker forward instead of starting a second one — two copies would double up `:colon:` replacements and fight over `⌥⌘E`
 - **Auto-Update (optional)**: Check GitHub for a new release weekly — off by default — and install it with one click when you approve. See [PRIVACY.md](PRIVACY.md) for what a check sends
 - **Categories & Search**: Browse by category or search by name/alias
 - **Keyboard Navigable**: `↑`/`↓` to move, `Enter` or `Tab` to insert, `Esc` to back out — the picker needs no mouse

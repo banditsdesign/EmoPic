@@ -9,12 +9,22 @@ final class EmojiPickerWindow {
     /// App that was frontmost before the picker stole focus — emoji targets it.
     private var previousApp: NSRunningApplication?
 
+    var isVisible: Bool { window?.isVisible ?? false }
+
     func toggle() {
-        if let w = window, w.isVisible {
+        if isVisible {
             close()
         } else {
             show()
         }
+    }
+
+    /// Open the picker only when it is not already up. Used for gestures that
+    /// mean "show me the picker" (a reopen, a handoff from a refused second
+    /// copy) — `show()` would rebuild the hosted view and wipe a search in
+    /// progress.
+    func presentIfHidden() {
+        if !isVisible { show() }
     }
 
     func show() {

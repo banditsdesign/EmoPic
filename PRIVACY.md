@@ -75,7 +75,7 @@ is used — no daemons, agents or kernel extensions.
 
 ## What EmoPic stores on your Mac
 
-All in one user-owned preferences file, `~/Library/Preferences/net.emopic.app.plist`:
+Preferences live in one user-owned file, `~/Library/Preferences/net.emopic.app.plist`:
 
 | What | Key | Notes |
 | ---- | --- | ----- |
@@ -100,11 +100,16 @@ Notes:
   they are not synced to your other devices.
 - Nothing is added to the clipboard except during the clipboard paste fallback, and the previous
   clipboard contents are restored afterwards.
+- Outside the preferences file there is exactly one file: `~/Library/Application Support/EmoPic/single-instance.lock`,
+  which holds the process id of the running EmoPic so a second copy can decline to start (two copies
+  would double up colon shortcuts and fight over the hotkey). It is rewritten at every launch, holds
+  a number and nothing else, and can be deleted at any time.
 
 ## Erasing everything
 
 ```sh
 defaults delete net.emopic.app
+rm -rf "$HOME/Library/Application Support/EmoPic"   # the lock file, nothing else
 ```
 
 Or quit EmoPic and delete `~/Library/Preferences/net.emopic.app.plist`. There is no server-side

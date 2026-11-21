@@ -24,6 +24,11 @@
 	<string>4</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
+	<!-- Advisory only, and it covers just this copy of the bundle: a second
+	     EmoPic living elsewhere on disk (a DMG, a build folder) is invisible to
+	     LaunchServices, so SingleInstanceGuard in App/ does the real work. -->
+	<key>LSMultipleInstancesProhibited</key>
+	<true/>
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAccessibilityUsageDescription</key>

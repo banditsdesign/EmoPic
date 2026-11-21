@@ -37,6 +37,7 @@
 		A10028 /* ColonBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20012 /* ColonBuffer.swift */; };
 		A10029 /* ColonSuggestionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20013 /* ColonSuggestionPanel.swift */; };
 		A1002A /* CustomDescriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1002B /* CustomDescriptionStore.swift */; };
+		A30001 /* SingleInstanceGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30010 /* SingleInstanceGuard.swift */; };
 		B000BF1 /* EmojiParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R1 /* EmojiParsingTests.swift */; };
 		B000BF2 /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R2 /* AppSettingsTests.swift */; };
 		B000BF3 /* HotKeyOptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R3 /* HotKeyOptionTests.swift */; };
@@ -44,6 +45,7 @@
 		B000BF5 /* ColonSuggestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R5 /* ColonSuggestionTests.swift */; };
 		B000BF6 /* CustomDescriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R6 /* CustomDescriptionTests.swift */; };
 		B000BF7 /* AXTextInserterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R7 /* AXTextInserterTests.swift */; };
+		B000BF8 /* SingleInstanceGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000R8 /* SingleInstanceGuardTests.swift */; };
 		E05A6773000860F526361C44 /* UpdateSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -89,6 +91,7 @@
 		A20011 /* GlobalHotKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalHotKey.swift; sourceTree = "<group>"; };
 		A20012 /* ColonBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonBuffer.swift; sourceTree = "<group>"; };
 		A20013 /* ColonSuggestionPanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonSuggestionPanel.swift; sourceTree = "<group>"; };
+		A30010 /* SingleInstanceGuard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SingleInstanceGuard.swift; sourceTree = "<group>"; };
 		B000FP /* EmoPicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmoPicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B000R1 /* EmojiParsingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiParsingTests.swift; sourceTree = "<group>"; };
 		B000R2 /* AppSettingsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
@@ -97,6 +100,7 @@
 		B000R5 /* ColonSuggestionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColonSuggestionTests.swift; sourceTree = "<group>"; };
 		B000R6 /* CustomDescriptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomDescriptionTests.swift; sourceTree = "<group>"; };
 		B000R7 /* AXTextInserterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AXTextInserterTests.swift; sourceTree = "<group>"; };
+		B000R8 /* SingleInstanceGuardTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SingleInstanceGuardTests.swift; sourceTree = "<group>"; };
 		F861146E34E6E86902F53F69 /* PickerSelectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PickerSelectionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -137,6 +141,7 @@
 			children = (
 				A10010 /* App.swift */,
 				A10011 /* EmoPic-App.swift */,
+				A30010 /* SingleInstanceGuard.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -257,6 +262,7 @@
 				B000R5 /* ColonSuggestionTests.swift */,
 				B000R6 /* CustomDescriptionTests.swift */,
 				B000R7 /* AXTextInserterTests.swift */,
+				B000R8 /* SingleInstanceGuardTests.swift */,
 				06BE1104B0739FC2EE65FF73 /* UpdateSettingsTests.swift */,
 				F861146E34E6E86902F53F69 /* PickerSelectionTests.swift */,
 			);
@@ -370,6 +376,7 @@
 			files = (
 				A10001 /* App.swift in Sources */,
 				A10002 /* EmoPic-App.swift in Sources */,
+				A30001 /* SingleInstanceGuard.swift in Sources */,
 				A10003 /* EmojiCategory.swift in Sources */,
 				A10004 /* EmojiDataManager.swift in Sources */,
 				A10005 /* EmojiItem.swift in Sources */,
@@ -407,6 +414,7 @@
 				B000BF5 /* ColonSuggestionTests.swift in Sources */,
 				B000BF6 /* CustomDescriptionTests.swift in Sources */,
 				B000BF7 /* AXTextInserterTests.swift in Sources */,
+				B000BF8 /* SingleInstanceGuardTests.swift in Sources */,
 				E05A6773000860F526361C44 /* UpdateSettingsTests.swift in Sources */,
 				60D1E8F5D90CA7A8C61BD597 /* PickerSelectionTests.swift in Sources */,
 			);
