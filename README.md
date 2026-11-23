@@ -39,7 +39,7 @@ Inside the picker window — the whole thing is usable without a mouse:
 - `Esc` - Clear the search field; press it again with the field empty to close the picker
 
 ### Privacy
-- **No telemetry — and no network unless you ask.** The emoji dataset is bundled inside the signed app bundle. EmoPic makes no connection whatsoever until you turn on *Automatically check for updates* (off by default) or press *Check for Updates…* yourself; then the only traffic is one request to GitHub for the release feed, plus the download if you choose to install. No identifiers, no system information, no analytics.
+- **No telemetry — and no network unless you ask.** The emoji dataset is bundled inside the signed app bundle. EmoPic makes no connection whatsoever until you turn on *Automatically check for updates* (off by default) or press *Check for Updates…* yourself; then the only traffic is one request to GitHub for the release feed, plus the download if you choose to install. No identifiers, no system information, no analytics. Each update's changelog rides inside that same feed, so the update notice can tell you what's changing without asking GitHub anything extra.
 - The colon-shortcut monitor uses a system-wide keyboard event tap, but keystrokes are examined **in memory only** — never logged, stored, or transmitted. At most the current `:shortcode` fragment (ASCII) is held, and it is discarded the moment you switch apps, press a modifier combo, or the pattern dies.
 - Password fields (secure input) and apps on your exclusion list are skipped, and a replacement only happens after EmoPic verifies the selected text matches exactly what you typed.
 - Full details — every value EmoPic stores, where it lives, and how to erase it — in [PRIVACY.md](PRIVACY.md).
@@ -70,7 +70,7 @@ EmoPic/
 
 Requires Xcode 15+ and macOS 14+ (Sonoma).
 
-Prebuilt: grab `EmoPic-1.2.dmg` from the [latest GitHub Release](https://github.com/banditsdesign/EmoPic/releases). Open the disk image and drag EmoPic to Applications. Apple-**notarized**, Developer ID signed, hardened runtime — Gatekeeper accepts it directly. First launch asks for Accessibility access once (for text insertion).
+Prebuilt: grab `EmoPic-1.3.dmg` from the [latest GitHub Release](https://github.com/banditsdesign/EmoPic/releases). Open the disk image and drag EmoPic to Applications. Apple-**notarized**, Developer ID signed, hardened runtime — Gatekeeper accepts it directly. First launch asks for Accessibility access once (for text insertion).
 
 ## Security
 
