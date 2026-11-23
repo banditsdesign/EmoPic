@@ -15,6 +15,15 @@
 // EmoPic sits between the user and their keyboard all day; restarting it should
 // never surprise them mid-sentence.
 //
+// The changelog the user sees is data, not code. Sparkle's update alert renders
+// the appcast item's `<description sparkle:format="markdown">` inline, and
+// `generate_appcast --embed-release-notes` writes that element from
+// docs/release-notes-<version>.md (scripts/release.sh). Embedding rather than
+// pointing `<sparkle:releaseNotesLink>` at a hosted file is deliberate: the
+// notes arrive in the same signed feed request the check already makes, so the
+// dialog fills in without another round trip to GitHub and without extra
+// hosting. `SUShowReleaseNotes` in Info.plist keeps the panel explicitly on.
+//
 // Two Sparkle details that matter for this app in particular:
 //   * The app is an `LSUIElement` agent, so update UI would otherwise appear
 //     behind the frontmost app. We activate before checking and when an update

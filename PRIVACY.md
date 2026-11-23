@@ -23,6 +23,10 @@ When you do, the app fetches one small file — the release feed — from `raw.g
 If an update is found and you choose to install it, it downloads the package from GitHub Releases
 and asks again before restarting.
 
+The changelog shown in the update dialog travels inside that same feed file, so reading it asks
+GitHub for nothing extra. Two things do leave for `github.com`, and only when you click them:
+the **Version History** button in the "you're up to date" alert, and any link inside a changelog.
+
 What that request carries:
 
 - the app version, in the user agent string (e.g. `EmoPic/1.0.4`);

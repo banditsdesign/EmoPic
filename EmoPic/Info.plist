@@ -50,6 +50,15 @@
 	<true/>
 	<key>SUEnableSystemProfiling</key>
 	<false/>
+	<!-- The changelog in the "update available" dialog. Sparkle reads it from the
+	     appcast's <description sparkle:format="markdown">, which generate_appcast
+	     --embed-release-notes writes from docs/release-notes-<version>.md — it
+	     rides along in the feed we already fetched, so showing it costs no extra
+	     request. Sparkle shows notes when a feed carries them and hides the panel
+	     otherwise; naming the key keeps that the intent rather than a default,
+	     and is the one switch that could turn the changelog off by accident. -->
+	<key>SUShowReleaseNotes</key>
+	<true/>
 	<key>SUScheduledCheckInterval</key>
 	<integer>604800</integer>
 	<!-- Only exercised if the installed app isn't user-writable (e.g. dragged
