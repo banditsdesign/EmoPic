@@ -3,13 +3,23 @@
     <channel>
         <title>EmoPic</title>
         <item>
-            <title>1.2</title>
-            <pubDate>Sat, 21 Nov 2026 19:38:07 +0800</pubDate>
-            <link>https://github.com/banditsdesign/EmoPic/releases/tag/v1.2</link>
-            <sparkle:version>9</sparkle:version>
-            <sparkle:shortVersionString>1.2</sparkle:shortVersionString>
+            <title>1.3</title>
+            <pubDate>Mon, 23 Nov 2026 12:30:22 +0800</pubDate>
+            <link>https://github.com/banditsdesign/EmoPic/releases/tag/v1.3</link>
+            <sparkle:fullReleaseNotesLink>https://github.com/banditsdesign/EmoPic/releases</sparkle:fullReleaseNotesLink>
+            <sparkle:version>10</sparkle:version>
+            <sparkle:shortVersionString>1.3</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/banditsdesign/EmoPic/releases/download/v1.2/EmoPic-1.2.zip" length="3809162" type="application/octet-stream" sparkle:edSignature="CxjY07Zb8qZ+7WEneH5BosGqKR3WwKILnvvZEJ7qw0Aob8Mm5BIdTeCFb4CKVN+cemRxeBzXEtYRLcIfl3EkAg=="/>
+            <description sparkle:format="markdown"><![CDATA[## What's new
+
+**Updates now say what changed.** When a new version turns up, the notice shows its changelog right there in the dialog — what's new, what's fixed — before you decide whether to restart.
+
+- The changelog arrives inside the same release feed EmoPic already fetches, so reading it sends nothing extra to GitHub.
+- The "you're up to date" notice now has a **Version History** button that opens every release in your browser.
+
+Update automatically via **Settings → About → Check for Updates**.
+]]></description>
+            <enclosure url="https://github.com/banditsdesign/EmoPic/releases/download/v1.3/EmoPic-1.3.zip" length="3809169" type="application/octet-stream" sparkle:edSignature="YTI2Y2cv4Z+fnR8HZ2xPZ/sZNjElkW5iRSSwJA8t1qhnkVzd/32zmo892coSnOIWoLSxZ1NxKf96BkmTmmBbCA=="/>
         </item>
     </channel>
 </rss>
