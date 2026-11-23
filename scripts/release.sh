@@ -465,11 +465,28 @@ if [[ "$VISIBILITY" != "PRIVATE" ]] && (( ! DRY )); then
   # which silently disabled this check on the 1.0.5 run.
   MNT="$(mktemp -d "${TMPDIR:-/tmp}/emopic-gatekeeper.XXXXXX")"
   if hdiutil attach "$DMG" -nobrowse -readonly -mountpoint "$MNT" >/dev/null 2>&1; then
-    if spctl --assess --type execute -vvv "$MNT/EmoPic.app" 2>&1 | grep -q "accepted"; then
+    # Two traps here. (1) Do not pipe spctl into `grep -q`: grep exits on the
+    # first match, spctl can die of SIGPIPE, and `pipefail` then reports a
+    # rejection for an app that was accepted. Capture and test the text. (2) The
+    # staple was written seconds ago and assessment needs an OCSP round trip, so
+    # a first pass that comes back empty has been a false alarm before — give it
+    # one retry before it is allowed to warn.
+    GK=""
+    for attempt in 1 2; do
+      GK="$(spctl --assess --type execute -vvv "$MNT/EmoPic.app" 2>&1 || true)"
+      if printf '%s\n' "$GK" | grep -q "accepted"; then
+        break
+      fi
+      if (( attempt < 2 )); then
+        info "Gatekeeper did not answer yet, retrying in 3s…"
+        sleep 3
+      fi
+    done
+    if printf '%s\n' "$GK" | grep -q "accepted"; then
       info "Gatekeeper accepts the app inside the DMG (notarized + stapled)"
     else
       warn "Gatekeeper did not accept the app inside the DMG — check before announcing"
-      spctl --assess --type execute -vvv "$MNT/EmoPic.app" 2>&1 | sed 's/^/        /' >&2
+      printf '%s\n' "$GK" | sed 's/^/        /' >&2
     fi
     built="$(plutil -extract CFBundleShortVersionString raw "$MNT/EmoPic.app/Contents/Info.plist")"
     [[ "$built" == "$VERSION" ]] || fail "DMG contains EmoPic $built, not $VERSION"
